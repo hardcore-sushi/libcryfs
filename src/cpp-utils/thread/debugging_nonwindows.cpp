@@ -14,6 +14,8 @@
 #include <sys/types.h>
 #endif
 
+#include <array>
+
 namespace cpputils {
 
 namespace {

@@ -17,6 +17,12 @@ set(BUILD_SHARED OFF CACHE BOOL "")
 set(BUILD_STATIC ON CACHE BOOL "")
 set(USE_INTERMEDIATE_OBJECTS_TARGET OFF CACHE BOOL "")
 set(cryptocpp_DISPLAY_CMAKE_SUPPORT_WARNING OFF CACHE BOOL "")
-add_subdirectory(vendor_cryptopp EXCLUDE_FROM_ALL)
 
-target_link_libraries(cryptopp INTERFACE cryptopp-static)
+set(LIBCRYPTOPP_A "${CMAKE_CURRENT_SOURCE_DIR}/vendor_cryptopp/build/${CMAKE_ANDROID_ARCH_ABI}/libcryptopp.a")
+add_custom_target(
+	vendor_cryptopp
+	COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/android-build.sh ${CMAKE_ANDROID_NDK} ${CMAKE_ANDROID_ARCH_ABI}
+	BYPRODUCTS ${LIBCRYPTOPP_A}
+	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+)
+target_link_libraries(cryptopp INTERFACE ${LIBCRYPTOPP_A})

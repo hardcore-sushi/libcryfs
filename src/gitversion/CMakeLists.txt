@@ -11,7 +11,7 @@ set(SOURCES
 )
 
 add_library(${PROJECT_NAME} STATIC ${SOURCES})
-target_link_libraries(${PROJECT_NAME})
+target_link_libraries(${PROJECT_NAME} PUBLIC boost)
 target_compile_definitions(${PROJECT_NAME} PRIVATE GIT_VERSION_STRING="${GIT_VERSION}")
 target_add_boost(${PROJECT_NAME})
 target_enable_style_warnings(${PROJECT_NAME})

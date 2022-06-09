@@ -146,16 +146,8 @@ if [ ! -d "${ANDROID_NDK_ROOT}" ]; then
     [ "$0" = "${BASH_SOURCE[0]}" ] && exit 1 || return 1
 fi
 
-# Error checking
-if [ ! -d "${ANDROID_SDK_ROOT}" ]; then
-    echo "ERROR: ANDROID_SDK_ROOT is not a valid path for ${USER}. Please set it."
-    echo "ANDROID_SDK_ROOT is '${ANDROID_SDK_ROOT}'"
-    [ "$0" = "${BASH_SOURCE[0]}" ] && exit 1 || return 1
-fi
-
 # User feedback
 #echo "ANDROID_NDK_ROOT is '${ANDROID_NDK_ROOT}'"
-#echo "ANDROID_SDK_ROOT is '${ANDROID_SDK_ROOT}'"
 
 #####################################################################
 
@@ -200,10 +192,6 @@ case "$ANDROID_CPU" in
   armv7*|armeabi*)
     CC="armv7a-linux-androideabi${ANDROID_API}-clang"
     CXX="armv7a-linux-androideabi${ANDROID_API}-clang++"
-    LD="arm-linux-androideabi-ld"
-    AS="arm-linux-androideabi-as"
-    AR="arm-linux-androideabi-ar"
-    RANLIB="arm-linux-androideabi-ranlib"
     STRIP="arm-linux-androideabi-strip"
     OBJDUMP="arm-linux-androideabi-objdump"
 
@@ -226,10 +214,6 @@ case "$ANDROID_CPU" in
   armv8*|aarch64|arm64*)
     CC="aarch64-linux-android${ANDROID_API}-clang"
     CXX="aarch64-linux-android${ANDROID_API}-clang++"
-    LD="aarch64-linux-android-ld"
-    AS="aarch64-linux-android-as"
-    AR="aarch64-linux-android-ar"
-    RANLIB="aarch64-linux-android-ranlib"
     STRIP="aarch64-linux-android-strip"
     OBJDUMP="aarch64-linux-android-objdump"
 
@@ -249,10 +233,6 @@ case "$ANDROID_CPU" in
   i686|x86)
     CC="i686-linux-android${ANDROID_API}-clang"
     CXX="i686-linux-android${ANDROID_API}-clang++"
-    LD="i686-linux-android-ld"
-    AS="i686-linux-android-as"
-    AR="i686-linux-android-ar"
-    RANLIB="i686-linux-android-ranlib"
     STRIP="i686-linux-android-strip"
     OBJDUMP="i686-linux-android-objdump"
 
@@ -260,12 +240,12 @@ case "$ANDROID_CPU" in
     # ANDROID_CPPFLAGS="-D__ANDROID__=${ANDROID_API}"
 
     ANDROID_CFLAGS="-target i686-none-linux-android${ANDROID_API}"
-    ANDROID_CFLAGS="${ANDROID_CFLAGS} -mtune=intel -mssse3 -mfpmath=sse"
+    ANDROID_CFLAGS="${ANDROID_CFLAGS} -mssse3 -mfpmath=sse"
     ANDROID_CFLAGS="${ANDROID_CFLAGS} -fstack-protector-strong -funwind-tables -fexceptions -frtti"
     ANDROID_CFLAGS="${ANDROID_CFLAGS} -fno-addrsig -fno-experimental-isel"
 
     ANDROID_CXXFLAGS="-target i686-none-linux-android${ANDROID_API}"
-    ANDROID_CXXFLAGS="${ANDROID_CXXFLAGS} -mtune=intel -mssse3 -mfpmath=sse"
+    ANDROID_CXXFLAGS="${ANDROID_CXXFLAGS} -mssse3 -mfpmath=sse"
     ANDROID_CXXFLAGS="${ANDROID_CXXFLAGS} -std=c++11 -stdlib=libc++"
     ANDROID_CXXFLAGS="${ANDROID_CXXFLAGS} -fstack-protector-strong -funwind-tables -fexceptions -frtti"
     ANDROID_CXXFLAGS="${ANDROID_CXXFLAGS} -fno-addrsig -fno-experimental-isel"
@@ -274,10 +254,6 @@ case "$ANDROID_CPU" in
   x86_64|x64)
     CC="x86_64-linux-android${ANDROID_API}-clang"
     CXX="x86_64-linux-android${ANDROID_API}-clang++"
-    LD="x86_64-linux-android-ld"
-    AS="x86_64-linux-android-as"
-    AR="x86_64-linux-android-ar"
-    RANLIB="x86_64-linux-android-ranlib"
     STRIP="x86_64-linux-android-strip"
     OBJDUMP="x86_64-linux-android-objdump"
 
@@ -285,12 +261,12 @@ case "$ANDROID_CPU" in
     # ANDROID_CPPFLAGS="-D__ANDROID__=${ANDROID_API}"
 
     ANDROID_CFLAGS="-target x86_64-none-linux-android${ANDROID_API}"
-    ANDROID_CFLAGS="${ANDROID_CFLAGS} -march=x86-64 -msse4.2 -mpopcnt -mtune=intel"
+    ANDROID_CFLAGS="${ANDROID_CFLAGS} -march=x86-64 -msse4.2 -mpopcnt"
     ANDROID_CFLAGS="${ANDROID_CFLAGS} -fstack-protector-strong -funwind-tables -fexceptions -frtti"
     ANDROID_CFLAGS="${ANDROID_CFLAGS} -fno-addrsig -fno-experimental-isel"
 
     ANDROID_CXXFLAGS="-target x86_64-none-linux-android${ANDROID_API}"
-    ANDROID_CXXFLAGS="${ANDROID_CXXFLAGS} -march=x86-64 -msse4.2 -mpopcnt -mtune=intel"
+    ANDROID_CXXFLAGS="${ANDROID_CXXFLAGS} -march=x86-64 -msse4.2 -mpopcnt"
     ANDROID_CXXFLAGS="${ANDROID_CXXFLAGS} -std=c++11 -stdlib=libc++"
     ANDROID_CXXFLAGS="${ANDROID_CXXFLAGS} -fstack-protector-strong -funwind-tables -fexceptions -frtti"
     ANDROID_CXXFLAGS="${ANDROID_CXXFLAGS} -fno-addrsig -fno-experimental-isel"
@@ -300,6 +276,11 @@ case "$ANDROID_CPU" in
     [ "$0" = "${BASH_SOURCE[0]}" ] && exit 1 || return 1
     ;;
 esac
+
+LD=$CC
+AS="llvm-as"
+AR="llvm-ar"
+RANLIB="llvm-ranlib"
 
 echo "Configuring for Android API ${ANDROID_API} ($ANDROID_CPU)"
 

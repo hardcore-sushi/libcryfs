@@ -1,0 +1,6 @@
+[submodule "vendor/boost/Boost-for-Android"]
+	path = vendor/boost/Boost-for-Android
+	url = https://github.com/moritz-wundke/Boost-for-Android.git
+[submodule "vendor/spdlog"]
+	path = vendor/spdlog
+	url = https://github.com/gabime/spdlog.git

@@ -17,7 +17,7 @@ require_clang_version(7.0)
 
 # Default value is not to build test cases
 option(BUILD_TESTING "build test cases" OFF)
-option(CRYFS_UPDATE_CHECKS "let cryfs check for updates and security vulnerabilities" ON)
+option(CRYFS_UPDATE_CHECKS "let cryfs check for updates and security vulnerabilities" OFF)
 option(DISABLE_OPENMP "allow building without OpenMP libraries. This will cause performance degradations." OFF)
 
 # The following options are helpful for development and/or CI
@@ -25,8 +25,6 @@ option(USE_WERROR "build with -Werror flag")
 option(USE_CLANG_TIDY "build with clang-tidy checks enabled" OFF)
 option(USE_IWYU "build with iwyu checks enabled" OFF)
 option(CLANG_TIDY_WARNINGS_AS_ERRORS "treat clang-tidy warnings as errors" OFF)
-
-set(DEPENDENCY_CONFIG "cmake-utils/DependenciesFromConan.cmake" CACHE FILEPATH "cmake configuration file defining how to get dependencies")
 
 if (MSVC)
     option(DOKAN_PATH "Location of the Dokan library, e.g. C:\\Program Files\\Dokan\\DokanLibrary-1.1.0" "")
@@ -44,10 +42,5 @@ if(MSVC)
   add_definitions(/bigobj)
 endif()
 
-include(${DEPENDENCY_CONFIG})
-
 add_subdirectory(vendor EXCLUDE_FROM_ALL)
 add_subdirectory(src)
-add_subdirectory(doc)
-add_subdirectory(test)
-add_subdirectory(cpack)

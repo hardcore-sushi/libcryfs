@@ -2,6 +2,7 @@
 #ifndef MESSMER_CRYFSCLI_CLI_H
 #define MESSMER_CRYFSCLI_CLI_H
 
+#include <fspp/fuse/Fuse.h>
 #include "program_options/ProgramOptions.h"
 #include <cryfs/impl/config/CryConfigFile.h>
 #include <boost/filesystem/path.hpp>
@@ -17,37 +18,23 @@
 namespace cryfs_cli {
     class Cli final {
     public:
-        Cli(cpputils::RandomGenerator &keyGenerator, const cpputils::SCryptSettings& scryptSettings, std::shared_ptr<cpputils::Console> console);
-        int main(int argc, const char **argv, cpputils::unique_ref<cpputils::HttpClient> httpClient, std::function<void()> onMounted);
+        Cli(cpputils::RandomGenerator &keyGenerator, const cpputils::SCryptSettings& scryptSettings);
+	fspp::fuse::Fuse* initFilesystem(const program_options::ProgramOptions &options, std::unique_ptr<string> password);
 
     private:
         void _checkForUpdates(cpputils::unique_ref<cpputils::HttpClient> httpClient);
-        void _runFilesystem(const program_options::ProgramOptions &options, std::function<void()> onMounted);
-        cryfs::CryConfigLoader::ConfigLoadResult _loadOrCreateConfig(const program_options::ProgramOptions &options, const cryfs::LocalStateDir& localStateDir);
+        cryfs::CryConfigLoader::ConfigLoadResult _loadOrCreateConfig(const program_options::ProgramOptions &options, const cryfs::LocalStateDir& localStateDir, std::unique_ptr<string> password);
         void _checkConfigIntegrity(const boost::filesystem::path& basedir, const cryfs::LocalStateDir& localStateDir, const cryfs::CryConfigFile& config, bool allowReplacedFilesystem);
-        cpputils::either<cryfs::CryConfigFile::LoadError, cryfs::CryConfigLoader::ConfigLoadResult> _loadOrCreateConfigFile(boost::filesystem::path configFilePath, cryfs::LocalStateDir localStateDir, const boost::optional<std::string> &cipher, const boost::optional<uint32_t> &blocksizeBytes, bool allowFilesystemUpgrade, const boost::optional<bool> &missingBlockIsIntegrityViolation, bool allowReplacedFilesystem);
+        cpputils::either<cryfs::CryConfigFile::LoadError, cryfs::CryConfigLoader::ConfigLoadResult> _loadOrCreateConfigFile(boost::filesystem::path configFilePath, cryfs::LocalStateDir localStateDir, std::unique_ptr<string> password, const boost::optional<std::string> &cipher, const boost::optional<uint32_t> &blocksizeBytes, bool allowFilesystemUpgrade, const boost::optional<bool> &missingBlockIsIntegrityViolation, bool allowReplacedFilesystem);
         boost::filesystem::path _determineConfigFile(const program_options::ProgramOptions &options);
-        static std::function<std::string()> _askPasswordForExistingFilesystem(std::shared_ptr<cpputils::Console> console);
-        static std::function<std::string()> _askPasswordForNewFilesystem(std::shared_ptr<cpputils::Console> console);
-        static std::function<std::string()> _askPasswordNoninteractive(std::shared_ptr<cpputils::Console> console);
-        static bool _confirmPassword(cpputils::Console* console, const std::string &password);
-        static bool _checkPassword(const std::string &password);
-        void _showVersion(cpputils::unique_ref<cpputils::HttpClient> httpClient);
-        void _initLogfile(const program_options::ProgramOptions &options);
+        void _initLogfile();
         void _sanityChecks(const program_options::ProgramOptions &options);
-        void _checkMountdirDoesntContainBasedir(const program_options::ProgramOptions &options);
-        bool _pathContains(const boost::filesystem::path &parent, const boost::filesystem::path &child);
         void _checkDirAccessible(const boost::filesystem::path &dir, const std::string &name, bool createMissingDir, cryfs::ErrorCode errorCode);
-        std::shared_ptr<cpputils::TempFile> _checkDirWriteable(const boost::filesystem::path &dir, const std::string &name, cryfs::ErrorCode errorCode);
-        void _checkDirReadable(const boost::filesystem::path &dir, std::shared_ptr<cpputils::TempFile> tempfile, const std::string &name, cryfs::ErrorCode errorCode);
-        boost::optional<cpputils::unique_ref<CallAfterTimeout>> _createIdleCallback(boost::optional<double> minutes, std::function<void()> callback);
         void _sanityCheckFilesystem(cryfs::CryDevice *device);
 
 
         cpputils::RandomGenerator &_keyGenerator;
         cpputils::SCryptSettings _scryptSettings;
-        std::shared_ptr<cpputils::Console> _console;
-        bool _noninteractive;
         boost::optional<cpputils::unique_ref<CallAfterTimeout>> _idleUnmounter;
         boost::optional<cpputils::unique_ref<cryfs::CryDevice>> _device;
 

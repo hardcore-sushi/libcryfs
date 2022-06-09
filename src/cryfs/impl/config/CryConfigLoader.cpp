@@ -11,7 +11,6 @@
 #include "cryfs/impl/CryfsException.h"
 
 namespace bf = boost::filesystem;
-using cpputils::Console;
 using cpputils::RandomGenerator;
 using cpputils::unique_ref;
 using cpputils::either;
@@ -25,8 +24,8 @@ using namespace cpputils::logging;
 
 namespace cryfs {
 
-CryConfigLoader::CryConfigLoader(shared_ptr<Console> console, RandomGenerator &keyGenerator, unique_ref<CryKeyProvider> keyProvider, LocalStateDir localStateDir, const optional<string> &cipherFromCommandLine, const boost::optional<uint32_t> &blocksizeBytesFromCommandLine, const boost::optional<bool> &missingBlockIsIntegrityViolationFromCommandLine)
-    : _console(console), _creator(std::move(console), keyGenerator, localStateDir), _keyProvider(std::move(keyProvider)),
+CryConfigLoader::CryConfigLoader(RandomGenerator &keyGenerator, unique_ref<CryKeyProvider> keyProvider, LocalStateDir localStateDir, const optional<string> &cipherFromCommandLine, const boost::optional<uint32_t> &blocksizeBytesFromCommandLine, const boost::optional<bool> &missingBlockIsIntegrityViolationFromCommandLine)
+    : _creator(keyGenerator, localStateDir), _keyProvider(std::move(keyProvider)),
       _cipherFromCommandLine(cipherFromCommandLine), _blocksizeBytesFromCommandLine(blocksizeBytesFromCommandLine),
       _missingBlockIsIntegrityViolationFromCommandLine(missingBlockIsIntegrityViolationFromCommandLine),
       _localStateDir(std::move(localStateDir)) {
@@ -69,14 +68,10 @@ void CryConfigLoader::_checkVersion(const CryConfig &config, bool allowFilesyste
     throw CryfsException("This filesystem is for CryFS " + config.Version() + ". This format is not supported anymore. Please migrate the file system to a supported version first by opening it with CryFS 0.9.x (x>=4).", ErrorCode::TooOldFilesystemFormat);
   }
   if (gitversion::VersionCompare::isOlderThan(CryConfig::FilesystemFormatVersion, config.Version())) {
-    if (!_console->askYesNo("This filesystem is for CryFS " + config.Version() + " or later and should not be opened with older versions. It is strongly recommended to update your CryFS version. However, if you have backed up your base directory and know what you're doing, you can continue trying to load it. Do you want to continue?", false)) {
-      throw CryfsException("This filesystem is for CryFS " + config.Version() + " or later. Please update your CryFS version.", ErrorCode::TooNewFilesystemFormat);
-    }
+    throw CryfsException("This filesystem is for CryFS " + config.Version() + " or later. Please update your CryFS version.", ErrorCode::TooNewFilesystemFormat);
   }
   if (!allowFilesystemUpgrade && gitversion::VersionCompare::isOlderThan(config.Version(), CryConfig::FilesystemFormatVersion)) {
-    if (!_console->askYesNo("This filesystem is for CryFS " + config.Version() + " (or a later version with the same storage format). You're running a CryFS version using storage format " + CryConfig::FilesystemFormatVersion + ". It is recommended to create a new filesystem with CryFS 0.10 and copy your files into it. If you don't want to do that, we can also attempt to migrate the existing filesystem, but that can take a long time, you won't be getting some of the performance advantages of the 0.10 release series, and if the migration fails, your data may be lost. If you decide to continue, please make sure you have a backup of your data. Do you want to attempt a migration now?", false)) {
-      throw CryfsException("This filesystem is for CryFS " + config.Version() + " (or a later version with the same storage format). It has to be migrated.", ErrorCode::TooOldFilesystemFormat);
-    }
+    throw CryfsException("This filesystem is for CryFS " + config.Version() + " (or a later version with the same storage format). It has to be migrated.", ErrorCode::TooOldFilesystemFormat);
   }
 }
 
@@ -97,9 +92,7 @@ void CryConfigLoader::_checkMissingBlocksAreIntegrityViolations(CryConfigFile *c
   // If the file system is set up to treat missing blocks as integrity violations, but we're accessing from a different client, ask whether they want to disable the feature.
   auto exclusiveClientId = configFile->config()->ExclusiveClientId();
   if (exclusiveClientId != none && *exclusiveClientId != myClientId) {
-    if (!_console->askYesNo("\nThis filesystem is setup to treat missing blocks as integrity violations and therefore only works in single-client mode. You are trying to access it from a different client.\nDo you want to disable this integrity feature and stop treating missing blocks as integrity violations?\nChoosing yes will not affect the confidentiality of your data, but in future you might not notice if an attacker deletes one of your files.", false)) {
-      throw CryfsException("File system is in single-client mode and can only be used from the client that created it.", ErrorCode::SingleClientFileSystem);
-    }
+    throw CryfsException("File system is in single-client mode and can only be used from the client that created it.", ErrorCode::SingleClientFileSystem);
     configFile->config()->SetExclusiveClientId(none);
     configFile->save();
   }

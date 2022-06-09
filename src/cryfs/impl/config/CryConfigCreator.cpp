@@ -15,8 +15,8 @@ using boost::none;
 
 namespace cryfs {
 
-    CryConfigCreator::CryConfigCreator(shared_ptr<Console> console, RandomGenerator &encryptionKeyGenerator, LocalStateDir localStateDir)
-        :_console(console), _configConsole(console), _encryptionKeyGenerator(encryptionKeyGenerator), _localStateDir(std::move(localStateDir)) {
+    CryConfigCreator::CryConfigCreator(RandomGenerator &encryptionKeyGenerator, LocalStateDir localStateDir)
+        :_configConsole(), _encryptionKeyGenerator(encryptionKeyGenerator), _localStateDir(std::move(localStateDir)) {
     }
 
     CryConfigCreator::ConfigCreateResult CryConfigCreator::create(const optional<string> &cipherFromCommandLine, const optional<uint32_t> &blocksizeBytesFromCommandLine, const optional<bool> &missingBlockIsIntegrityViolationFromCommandLine, bool allowReplacedFilesystem) {
@@ -73,9 +73,7 @@ namespace cryfs {
     }
 
     string CryConfigCreator::_generateEncKey(const std::string &cipher) {
-        _console->print("\nGenerating secure encryption key. This can take some time...");
         auto key = CryCiphers::find(cipher).createKey(_encryptionKeyGenerator);
-        _console->print("done\n");
         return key;
     }
 

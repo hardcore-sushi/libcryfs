@@ -16,15 +16,11 @@ set(SOURCES
         tempfile/TempFile.cpp
         tempfile/TempDir.cpp
         network/HttpClient.cpp
-        network/CurlHttpClient.cpp
-		network/WinHttpClient.cpp
         network/FakeHttpClient.cpp
         io/Console.cpp
         io/DontEchoStdinToStdoutRAII.cpp
-        io/IOStreamConsole.cpp
         io/NoninteractiveConsole.cpp
         io/pipestream.cpp
-        io/ProgressBar.cpp
         thread/LoopThread.cpp
         thread/ThreadSystem.cpp
         thread/debugging_nonwindows.cpp
@@ -76,20 +72,13 @@ else()
     endif()
 endif()
 
-if (NOT MSVC)
-  find_package(CURL REQUIRED)
-  target_include_directories(${PROJECT_NAME} PUBLIC ${CURL_INCLUDE_DIRS})
-  target_link_libraries(${PROJECT_NAME} PUBLIC ${CURL_LIBRARIES})
-else()
-  target_link_libraries(${PROJECT_NAME} PUBLIC WinHttp)
-endif()
 
 find_package(Threads REQUIRED)
 target_link_libraries(${PROJECT_NAME} PUBLIC ${CMAKE_THREAD_LIBS_INIT})
 
 target_link_libraries(${PROJECT_NAME} PUBLIC ${CMAKE_DL_LIBS})
 
-target_link_libraries(${PROJECT_NAME} PUBLIC CryfsDependencies_spdlog cryptopp CryfsDependencies_range-v3)
+target_link_libraries(${PROJECT_NAME} PUBLIC cryptopp boost spdlog)
 
 target_add_boost(${PROJECT_NAME})
 target_enable_style_warnings(${PROJECT_NAME})
