@@ -1,6 +1,5 @@
 #include "VersionChecker.h"
 #include <sstream>
-#include <cpp-utils/network/CurlHttpClient.h>
 #include <boost/property_tree/json_parser.hpp>
 #include <cpp-utils/logging/logging.h>
 #include <boost/foreach.hpp>

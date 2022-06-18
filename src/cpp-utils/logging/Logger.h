@@ -3,9 +3,8 @@
 #define MESSMER_CPPUTILS_LOGGING_LOGGER_H
 
 #include <spdlog/spdlog.h>
+#include <spdlog/sinks/android_sink.h>
 #include "../macros.h"
-
-#include <spdlog/sinks/stdout_sinks.h>
 
 namespace cpputils {
 namespace logging {
@@ -33,7 +32,7 @@ namespace logging {
     private:
 
         static std::shared_ptr<spdlog::logger> _defaultLogger() {
-            static auto singleton = spdlog::stderr_logger_mt("Log");
+            static auto singleton = spdlog::android_logger_mt("libcryfs");
             return singleton;
         }
 

@@ -3,7 +3,6 @@
 #include "KnownBlockVersions.h"
 #include <cpp-utils/data/SerializationHelper.h>
 #include <cpp-utils/process/SignalCatcher.h>
-#include <cpp-utils/io/ProgressBar.h>
 
 using cpputils::Data;
 using cpputils::unique_ref;
@@ -203,14 +202,11 @@ void IntegrityBlockStore2::migrateFromBlockstoreWithoutVersionNumbers(BlockStore
   SignalCatcher signalCatcher;
 
   KnownBlockVersions knownBlockVersions(integrityFilePath, myClientId);
-  uint64_t numProcessedBlocks = 0;
-  cpputils::ProgressBar progressbar("Migrating file system for integrity features. This can take a while...", baseBlockStore->numBlocks());
   baseBlockStore->forEachBlock([&] (const BlockId &blockId) {
     if (signalCatcher.signal_occurred()) {
       throw std::runtime_error("Caught signal");
     }
     migrateBlockFromBlockstoreWithoutVersionNumbers(baseBlockStore, blockId, &knownBlockVersions);
-    progressbar.update(++numProcessedBlocks);
   });
 }
 

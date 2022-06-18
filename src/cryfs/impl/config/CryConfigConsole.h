@@ -9,7 +9,7 @@
 namespace cryfs {
     class CryConfigConsole final {
     public:
-        CryConfigConsole(std::shared_ptr<cpputils::Console> console);
+        CryConfigConsole();
         CryConfigConsole(CryConfigConsole &&rhs) = default;
 
         std::string askCipher();
@@ -24,12 +24,6 @@ namespace cryfs {
 
         bool _checkUseDefaultSettings();
 
-        std::string _askCipher() const;
-        bool _showWarningForCipherAndReturnIfOk(const std::string &cipherName) const;
-        uint32_t _askBlocksizeBytes() const;
-        bool _askMissingBlockIsIntegrityViolation() const;
-
-        std::shared_ptr<cpputils::Console> _console;
         boost::optional<bool> _useDefaultSettings;
 
         DISALLOW_COPY_AND_ASSIGN(CryConfigConsole);

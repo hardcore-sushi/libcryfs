@@ -3,7 +3,6 @@
 #include "DirBlob.h"
 #include "SymlinkBlob.h"
 #include <cryfs/impl/config/CryConfigFile.h>
-#include <cpp-utils/io/ProgressBar.h>
 #include <cpp-utils/process/SignalCatcher.h>
 
 using cpputils::unique_ref;
@@ -46,10 +45,8 @@ boost::optional<unique_ref<FsBlob>> FsBlobStore::load(const blockstore::BlockId 
         auto fsBlobStore = make_unique_ref<FsBlobStore>(std::move(blobStore));
 
         uint64_t migratedBlocks = 0;
-        cpputils::ProgressBar progressbar("Migrating file system for conflict resolution features. This can take a while...", fsBlobStore->numBlocks());
         fsBlobStore->_migrate(std::move(*rootBlob), blockstore::BlockId::Null(), &signalCatcher, [&] (uint32_t numNodes) {
             migratedBlocks += numNodes;
-            progressbar.update(migratedBlocks);
         });
 
         return fsBlobStore;

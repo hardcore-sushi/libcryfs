@@ -12,7 +12,7 @@
 namespace cryfs {
     class CryConfigCreator final {
     public:
-        CryConfigCreator(std::shared_ptr<cpputils::Console> console, cpputils::RandomGenerator &encryptionKeyGenerator, LocalStateDir localStateDir);
+        CryConfigCreator(cpputils::RandomGenerator &encryptionKeyGenerator, LocalStateDir localStateDir);
         CryConfigCreator(CryConfigCreator &&rhs) = default;
 
         struct ConfigCreateResult {
@@ -30,7 +30,6 @@ namespace cryfs {
         boost::optional<uint32_t> _generateExclusiveClientId(const boost::optional<bool> &missingBlockIsIntegrityViolationFromCommandLine, uint32_t myClientId);
         bool _generateMissingBlockIsIntegrityViolation(const boost::optional<bool> &missingBlockIsIntegrityViolationFromCommandLine);
 
-        std::shared_ptr<cpputils::Console> _console;
         CryConfigConsole _configConsole;
         cpputils::RandomGenerator &_encryptionKeyGenerator;
         LocalStateDir _localStateDir;

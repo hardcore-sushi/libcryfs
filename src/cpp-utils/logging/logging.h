@@ -5,13 +5,6 @@
 #include "Logger.h"
 #include <stdexcept>
 #include <spdlog/fmt/ostr.h>
-#include <spdlog/sinks/basic_file_sink.h>
-
-#if defined(_MSC_VER)
-#include <spdlog/sinks/msvc_sink.h>
-#else
-#include <spdlog/sinks/syslog_sink.h>
-#endif
 
 namespace cpputils {
     namespace logging {
@@ -76,14 +69,6 @@ namespace cpputils {
         template <typename... Args>
         inline void LOG(DEBUG_TYPE, const char* fmt, const Args&... args) {
             logger()->debug(fmt, args...);
-        }
-
-        inline std::shared_ptr<spdlog::logger> system_logger(const std::string& name) {
-#if defined(_MSC_VER)
-          return spdlog::create<spdlog::sinks::msvc_sink_mt>(name);
-#else
-          return spdlog::syslog_logger_mt(name, name, LOG_PID);
-#endif
         }
     }
 }

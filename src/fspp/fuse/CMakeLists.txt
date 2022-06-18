@@ -4,12 +4,13 @@ set(SOURCES
   ../impl/FilesystemImpl.cpp
   ../impl/Profiler.cpp
   ../fuse/Fuse.cpp
+  jni.cpp
 )
 
 add_library(${PROJECT_NAME} STATIC ${SOURCES})
 
 target_compile_definitions(${PROJECT_NAME} PUBLIC _FILE_OFFSET_BITS=64)
-target_link_libraries(${PROJECT_NAME} PUBLIC cpp-utils fspp-interface)
+target_link_libraries(${PROJECT_NAME} PUBLIC cpp-utils fspp-interface cryfs-cli)
 
 target_add_boost(${PROJECT_NAME})
 target_enable_style_warnings(${PROJECT_NAME})
@@ -37,8 +38,6 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 
 else() # Linux and macOS
   find_package(PkgConfig REQUIRED)
-  pkg_check_modules(Fuse REQUIRED IMPORTED_TARGET fuse)
-  target_link_libraries(${PROJECT_NAME} PUBLIC PkgConfig::Fuse)
 endif()
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
