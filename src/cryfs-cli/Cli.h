@@ -27,8 +27,9 @@ namespace cryfs_cli {
         void _checkConfigIntegrity(const boost::filesystem::path& basedir, const cryfs::LocalStateDir& localStateDir, const cryfs::CryConfigFile& config, bool allowReplacedFilesystem);
         cpputils::either<cryfs::CryConfigFile::LoadError, cryfs::CryConfigLoader::ConfigLoadResult> _loadOrCreateConfigFile(boost::filesystem::path configFilePath, cryfs::LocalStateDir localStateDir, std::unique_ptr<string> password, const boost::optional<std::string> &cipher, const boost::optional<uint32_t> &blocksizeBytes, bool allowFilesystemUpgrade, const boost::optional<bool> &missingBlockIsIntegrityViolation, bool allowReplacedFilesystem);
         boost::filesystem::path _determineConfigFile(const program_options::ProgramOptions &options);
-        void _showVersion();
         void _initLogfile();
+        void _sanityChecks(const program_options::ProgramOptions &options);
+        void _checkDirAccessible(const boost::filesystem::path &dir, const std::string &name, bool createMissingDir, cryfs::ErrorCode errorCode);
         void _sanityCheckFilesystem(cryfs::CryDevice *device);
 
 

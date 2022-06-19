@@ -13,21 +13,29 @@ using fspp::fuse::Fuse;
 
 std::set<jlong> validFusePtrs;
 
-extern "C" jlong cryfs_init(JNIEnv* env, jstring jbaseDir, jstring jlocalStateDir, jbyteArray jpassword) {
+extern "C" jlong cryfs_init(JNIEnv* env, jstring jbaseDir, jstring jlocalStateDir, jbyteArray jpassword, jboolean createBaseDir, jstring jcipher) {
 	const char* baseDir = env->GetStringUTFChars(jbaseDir, NULL);
 	const char* localStateDir = env->GetStringUTFChars(jlocalStateDir, NULL);
+	boost::optional<string> cipher = none;
+	if (jcipher != NULL) {
+		const char* cipherName = env->GetStringUTFChars(jcipher, NULL);
+		cipher = boost::optional<string>(cipherName);
+		env->ReleaseStringUTFChars(jcipher, cipherName);
+	}
         auto &keyGenerator = Random::OSRandom();
-	ProgramOptions options = ProgramOptions(baseDir, none, localStateDir, false, false, false, none, none, false, none);
+	ProgramOptions options = ProgramOptions(baseDir, none, localStateDir, false, false, createBaseDir, cipher, none, false, none);
 	char* password = reinterpret_cast<char*>(env->GetByteArrayElements(jpassword, NULL));
 
         Fuse* fuse = Cli(keyGenerator, SCrypt::DefaultSettings).initFilesystem(options, make_unique<string>(password));
 
+	env->ReleaseByteArrayElements(jpassword, reinterpret_cast<jbyte*>(password), 0);
 	env->ReleaseStringUTFChars(jbaseDir, baseDir);
 	env->ReleaseStringUTFChars(jlocalStateDir, localStateDir);
-	env->ReleaseByteArrayElements(jpassword, reinterpret_cast<jbyte*>(password), 0);
 
 	jlong fusePtr = reinterpret_cast<jlong>(fuse);
-	validFusePtrs.insert(fusePtr);
+	if (fusePtr != 0) {
+		validFusePtrs.insert(fusePtr);
+	}
 	return fusePtr;
 }
 

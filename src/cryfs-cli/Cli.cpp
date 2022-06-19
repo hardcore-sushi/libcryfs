@@ -115,7 +115,10 @@ namespace cryfs_cli {
     }
 
     fspp::fuse::Fuse* Cli::initFilesystem(const ProgramOptions &options, unique_ptr<string> password) {
+        cpputils::showBacktraceOnCrash();
+        cpputils::set_thread_name("cryfs");
         try {
+	    _sanityChecks(options);
             LocalStateDir localStateDir(options.localStateDir());
             auto blockStore = make_unique_ref<OnDiskBlockStore2>(options.baseDir());
             auto config = _loadOrCreateConfig(options, localStateDir, std::move(password));
@@ -172,24 +175,24 @@ namespace cryfs_cli {
         (*rootDir)->children(); // Load children
     }
 
-    /*int Cli::main(int argc, const char **argv, std::function<void()> onMounted) {
-        cpputils::showBacktraceOnCrash();
-        cpputils::set_thread_name("cryfs");
+	void Cli::_sanityChecks(const ProgramOptions &options) {
+		_checkDirAccessible(bf::absolute(options.baseDir()), "base directory", options.createMissingBasedir(), ErrorCode::InaccessibleBaseDir);
+    }
 
-        try {
-            _showVersion();
-            ProgramOptions options = program_options::Parser(argc, argv).parse(CryCiphers::supportedCipherNames());
-            _sanityChecks(options);
-            _runFilesystem(options);
-        } catch (const CryfsException &e) {
-            if (e.what() != string()) {
-              std::cerr << "Error " << static_cast<int>(e.errorCode()) << ": " << e.what() << std::endl;
+    void Cli::_checkDirAccessible(const bf::path &dir, const std::string &name, bool createMissingDir, ErrorCode errorCode) {
+        if (!bf::exists(dir)) {
+            if (createMissingDir) {
+                LOG(INFO, "Automatically creating {}", name);
+                if (!bf::create_directory(dir)) {
+                    throw CryfsException("Error creating "+name, errorCode);
+                }
+            } else {
+                //std::cerr << "Exit code: " << exitCode(errorCode) << std::endl;
+                throw CryfsException(name + " not found.", errorCode);
             }
-            return exitCode(e.errorCode());
-        } catch (const std::runtime_error &e) {
-            std::cerr << "Error: " << e.what() << std::endl;
-            return exitCode(ErrorCode::UnspecifiedError);
         }
-        return exitCode(ErrorCode::Success);
-    }*/
+        if (!bf::is_directory(dir)) {
+            throw CryfsException(name+" is not a directory.", errorCode);
+        }
+    }
 }
