@@ -258,11 +258,8 @@ std::string SHA1::AlgorithmProvider() const
         return "SSE2";
 #endif
 #if CRYPTOGAMS_ARM_SHA1
-# if CRYPTOPP_ARM_NEON_AVAILABLE
     if (HasNEON())
         return "NEON";
-    else
-# endif
     if (HasARMv7())
         return "ARMv7";
 #endif
@@ -294,22 +291,18 @@ void SHA1::Transform(word32 *state, const word32 *data)
         return;
     }
 #endif
-// Disabled at the moment due to MDC and SEAL failures
 #if CRYPTOGAMS_ARM_SHA1 && 0
-# if CRYPTOPP_ARM_NEON_AVAILABLE
     if (HasNEON())
     {
-#  if defined(CRYPTOPP_LITTLE_ENDIAN)
+# if defined(CRYPTOPP_LITTLE_ENDIAN)
         word32 dataBuf[16];
         ByteReverse(dataBuf, data, SHA1::BLOCKSIZE);
-        cryptogams_sha1_block_data_order_neon(state, dataBuf, 1);
-#  else
         cryptogams_sha1_block_data_order_neon(state, data, 1);
-#  endif
+# else
+        cryptogams_sha1_block_data_order_neon(state, data, 1);
+# endif
         return;
     }
-    else
-# endif
     if (HasARMv7())
     {
 # if defined(CRYPTOPP_LITTLE_ENDIAN)
@@ -346,14 +339,11 @@ size_t SHA1::HashMultipleBlocks(const word32 *input, size_t length)
     }
 #endif
 #if CRYPTOGAMS_ARM_SHA1
-# if CRYPTOPP_ARM_NEON_AVAILABLE
     if (HasNEON())
     {
         cryptogams_sha1_block_data_order_neon(m_state, input, length / SHA1::BLOCKSIZE);
         return length & (SHA1::BLOCKSIZE - 1);
     }
-    else
-# endif
     if (HasARMv7())
     {
         cryptogams_sha1_block_data_order(m_state, input, length / SHA1::BLOCKSIZE);
@@ -474,11 +464,8 @@ std::string SHA256_AlgorithmProvider()
         return "SSE2";
 #endif
 #if CRYPTOGAMS_ARM_SHA256
-# if CRYPTOPP_ARM_NEON_AVAILABLE
     if (HasNEON())
         return "NEON";
-    else
-# endif
     if (HasARMv7())
         return "ARMv7";
 #endif
@@ -865,22 +852,18 @@ void SHA256::Transform(word32 *state, const word32 *data)
         return;
     }
 #endif
-// Disabled at the moment due to MDC and SEAL failures
 #if CRYPTOGAMS_ARM_SHA256 && 0
-# if CRYPTOPP_ARM_NEON_AVAILABLE
     if (HasNEON())
     {
-#  if defined(CRYPTOPP_LITTLE_ENDIAN)
+# if defined(CRYPTOPP_LITTLE_ENDIAN)
         word32 dataBuf[16];
         ByteReverse(dataBuf, data, SHA256::BLOCKSIZE);
-        cryptogams_sha256_block_data_order_neon(state, dataBuf, 1);
-#  else
         cryptogams_sha256_block_data_order_neon(state, data, 1);
-#  endif
+# else
+        cryptogams_sha256_block_data_order_neon(state, data, 1);
+# endif
         return;
     }
-    else
-# endif
     if (HasARMv7())
     {
 # if defined(CRYPTOPP_LITTLE_ENDIAN)
@@ -932,14 +915,11 @@ size_t SHA256::HashMultipleBlocks(const word32 *input, size_t length)
     }
 #endif
 #if CRYPTOGAMS_ARM_SHA256
-# if CRYPTOPP_ARM_NEON_AVAILABLE
     if (HasNEON())
     {
         cryptogams_sha256_block_data_order_neon(m_state, input, length / SHA256::BLOCKSIZE);
         return length & (SHA256::BLOCKSIZE - 1);
     }
-    else
-# endif
     if (HasARMv7())
     {
         cryptogams_sha256_block_data_order(m_state, input, length / SHA256::BLOCKSIZE);
@@ -1003,14 +983,11 @@ size_t SHA224::HashMultipleBlocks(const word32 *input, size_t length)
     }
 #endif
 #if CRYPTOGAMS_ARM_SHA256
-# if CRYPTOPP_ARM_NEON_AVAILABLE
     if (HasNEON())
     {
         cryptogams_sha256_block_data_order_neon(m_state, input, length / SHA256::BLOCKSIZE);
         return length & (SHA256::BLOCKSIZE - 1);
     }
-    else
-# endif
     if (HasARMv7())
     {
         cryptogams_sha256_block_data_order(m_state, input, length / SHA256::BLOCKSIZE);
@@ -1062,11 +1039,8 @@ std::string SHA512_AlgorithmProvider()
         return "SSE2";
 #endif
 #if CRYPTOGAMS_ARM_SHA512
-# if CRYPTOPP_ARM_NEON_AVAILABLE
     if (HasNEON())
         return "NEON";
-    else
-# endif
     if (HasARMv7())
         return "ARMv7";
 #endif
@@ -1377,20 +1351,17 @@ void SHA512::Transform(word64 *state, const word64 *data)
     }
 #endif
 #if CRYPTOGAMS_ARM_SHA512
-# if CRYPTOPP_ARM_NEON_AVAILABLE
     if (HasNEON())
     {
-#  if (CRYPTOPP_LITTLE_ENDIAN)
+# if (CRYPTOPP_LITTLE_ENDIAN)
         word64 dataBuf[16];
         ByteReverse(dataBuf, data, SHA512::BLOCKSIZE);
         cryptogams_sha512_block_data_order_neon(state, dataBuf, 1);
-#  else
+# else
         cryptogams_sha512_block_data_order_neon(state, data, 1);
-#  endif
+# endif
         return;
     }
-    else
-# endif
     if (HasARMv7())
     {
 # if (CRYPTOPP_LITTLE_ENDIAN)

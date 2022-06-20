@@ -92,7 +92,6 @@ local.properties
 *.suo
 *.user
 *.sdf
-/.vs
 
 # Build results
 
