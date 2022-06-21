@@ -1,7 +1,12 @@
 project(libboost)
 
 add_library(boost INTERFACE)
-target_include_directories(boost SYSTEM INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/${CMAKE_ANDROID_ARCH_ABI}/include/boost-1_76)
-
-file(GLOB BOOST_STATIC_LIBS ${CMAKE_CURRENT_SOURCE_DIR}/${ANDROID_ABI}/lib/libboost_*.a)
-target_link_libraries(boost INTERFACE ${BOOST_STATIC_LIBS})
+add_custom_target(
+	vendor_boost
+	COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/android-build.sh ${CMAKE_ANDROID_NDK} ${CMAKE_ANDROID_ARCH_ABI}
+	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+)
+set(BOOST_OUTPUT "Boost-for-Android/build/out/${CMAKE_ANDROID_ARCH_ABI}")
+file(GLOB BOOST_STATIC_LIBS ${BOOST_OUTPUT}/lib/libboost_*.a)
+target_include_directories(boost SYSTEM INTERFACE ${BOOST_OUTPUT}/include/boost-1_76)
+target_link_libraries(boost INTERFACE vendor_boost ${BOOST_STATIC_LIBS})

@@ -146,16 +146,8 @@ if [ ! -d "${ANDROID_NDK_ROOT}" ]; then
     [ "$0" = "${BASH_SOURCE[0]}" ] && exit 1 || return 1
 fi
 
-# Error checking
-if [ ! -d "${ANDROID_SDK_ROOT}" ]; then
-    echo "ERROR: ANDROID_SDK_ROOT is not a valid path for ${USER}. Please set it."
-    echo "ANDROID_SDK_ROOT is '${ANDROID_SDK_ROOT}'"
-    [ "$0" = "${BASH_SOURCE[0]}" ] && exit 1 || return 1
-fi
-
 # User feedback
 #echo "ANDROID_NDK_ROOT is '${ANDROID_NDK_ROOT}'"
-#echo "ANDROID_SDK_ROOT is '${ANDROID_SDK_ROOT}'"
 
 #####################################################################
 
@@ -200,10 +192,7 @@ case "$ANDROID_CPU" in
   armv7*|armeabi*)
     CC="armv7a-linux-androideabi${ANDROID_API}-clang"
     CXX="armv7a-linux-androideabi${ANDROID_API}-clang++"
-    LD="arm-linux-androideabi-ld"
-    AS="arm-linux-androideabi-as"
     AR="arm-linux-androideabi-ar"
-    RANLIB="arm-linux-androideabi-ranlib"
     STRIP="arm-linux-androideabi-strip"
     OBJDUMP="arm-linux-androideabi-objdump"
 
@@ -226,10 +215,7 @@ case "$ANDROID_CPU" in
   armv8*|aarch64|arm64*)
     CC="aarch64-linux-android${ANDROID_API}-clang"
     CXX="aarch64-linux-android${ANDROID_API}-clang++"
-    LD="aarch64-linux-android-ld"
-    AS="aarch64-linux-android-as"
     AR="aarch64-linux-android-ar"
-    RANLIB="aarch64-linux-android-ranlib"
     STRIP="aarch64-linux-android-strip"
     OBJDUMP="aarch64-linux-android-objdump"
 
@@ -249,10 +235,7 @@ case "$ANDROID_CPU" in
   i686|x86)
     CC="i686-linux-android${ANDROID_API}-clang"
     CXX="i686-linux-android${ANDROID_API}-clang++"
-    LD="i686-linux-android-ld"
-    AS="i686-linux-android-as"
     AR="i686-linux-android-ar"
-    RANLIB="i686-linux-android-ranlib"
     STRIP="i686-linux-android-strip"
     OBJDUMP="i686-linux-android-objdump"
 
@@ -274,10 +257,7 @@ case "$ANDROID_CPU" in
   x86_64|x64)
     CC="x86_64-linux-android${ANDROID_API}-clang"
     CXX="x86_64-linux-android${ANDROID_API}-clang++"
-    LD="x86_64-linux-android-ld"
-    AS="x86_64-linux-android-as"
     AR="x86_64-linux-android-ar"
-    RANLIB="x86_64-linux-android-ranlib"
     STRIP="x86_64-linux-android-strip"
     OBJDUMP="x86_64-linux-android-objdump"
 
@@ -300,6 +280,10 @@ case "$ANDROID_CPU" in
     [ "$0" = "${BASH_SOURCE[0]}" ] && exit 1 || return 1
     ;;
 esac
+
+LD=$CC
+AS="llvm-as"
+RANLIB="llvm-ranlib"
 
 echo "Configuring for Android API ${ANDROID_API} ($ANDROID_CPU)"
 
