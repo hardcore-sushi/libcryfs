@@ -1,5 +1,10 @@
 #!/bin/sh
 
+if [ -d Boost-for-Android/build/out/$2 ]; then
+	echo "boost already built for $2";
+	exit 0
+fi
+
 BOOST_TAR=boost_1_76_0.tar.bz2
 
 cd Boost-for-Android || exit 1
