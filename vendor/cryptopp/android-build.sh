@@ -1,7 +1,8 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
+export ANDROID_NDK_ROOT=$1 && \
 cd vendor_cryptopp && \
-	mkdir -p build/$1 && \
-	TestScripts/setenv-android.sh 21 $1 && \
-	make -f GNUmakefile-cross static && \
-	mv libcryptopp.a build/$1
+mkdir -p build/$2 && \
+source TestScripts/setenv-android.sh 21 $2 && \
+make -f GNUmakefile-cross static && \
+mv libcryptopp.a build/$2

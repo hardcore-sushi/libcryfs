@@ -19,5 +19,11 @@ set(USE_INTERMEDIATE_OBJECTS_TARGET OFF CACHE BOOL "")
 set(cryptocpp_DISPLAY_CMAKE_SUPPORT_WARNING OFF CACHE BOOL "")
 
 set(LIBCRYPTOPP_A "${CMAKE_CURRENT_SOURCE_DIR}/vendor_cryptopp/build/${CMAKE_ANDROID_ARCH_ABI}/libcryptopp.a")
-add_custom_command(OUTPUT ${LIBCRYPTOPP_A} COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/android-build.sh ${CMAKE_ANDROID_ARCH_ABI})
+add_custom_target(
+	vendor_cryptopp
+	COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/android-build.sh ${CMAKE_ANDROID_NDK} ${CMAKE_ANDROID_ARCH_ABI}
+	BYPRODUCTS ${LIBCRYPTOPP_A}
+	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+)
+#add_dependencies(cryptopp vendor_cryptopp)
 target_link_libraries(cryptopp INTERFACE ${LIBCRYPTOPP_A})

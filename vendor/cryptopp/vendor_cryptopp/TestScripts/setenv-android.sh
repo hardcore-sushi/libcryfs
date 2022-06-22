@@ -192,7 +192,6 @@ case "$ANDROID_CPU" in
   armv7*|armeabi*)
     CC="armv7a-linux-androideabi${ANDROID_API}-clang"
     CXX="armv7a-linux-androideabi${ANDROID_API}-clang++"
-    AR="arm-linux-androideabi-ar"
     STRIP="arm-linux-androideabi-strip"
     OBJDUMP="arm-linux-androideabi-objdump"
 
@@ -215,7 +214,6 @@ case "$ANDROID_CPU" in
   armv8*|aarch64|arm64*)
     CC="aarch64-linux-android${ANDROID_API}-clang"
     CXX="aarch64-linux-android${ANDROID_API}-clang++"
-    AR="aarch64-linux-android-ar"
     STRIP="aarch64-linux-android-strip"
     OBJDUMP="aarch64-linux-android-objdump"
 
@@ -235,7 +233,6 @@ case "$ANDROID_CPU" in
   i686|x86)
     CC="i686-linux-android${ANDROID_API}-clang"
     CXX="i686-linux-android${ANDROID_API}-clang++"
-    AR="i686-linux-android-ar"
     STRIP="i686-linux-android-strip"
     OBJDUMP="i686-linux-android-objdump"
 
@@ -257,7 +254,6 @@ case "$ANDROID_CPU" in
   x86_64|x64)
     CC="x86_64-linux-android${ANDROID_API}-clang"
     CXX="x86_64-linux-android${ANDROID_API}-clang++"
-    AR="x86_64-linux-android-ar"
     STRIP="x86_64-linux-android-strip"
     OBJDUMP="x86_64-linux-android-objdump"
 
@@ -283,6 +279,7 @@ esac
 
 LD=$CC
 AS="llvm-as"
+AR="llvm-ar"
 RANLIB="llvm-ranlib"
 
 echo "Configuring for Android API ${ANDROID_API} ($ANDROID_CPU)"

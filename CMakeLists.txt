@@ -7,19 +7,19 @@ cmake_policy(SET CMP0065 OLD)
 #  - try if setting CRYPTOPP_NATIVE_ARCH=ON and adding -march=native to the compile commands for cryfs source files makes a difference
 #    -> if yes, offer a cmake option to enable both of these
 
-set(ANDROID_ABI arm64-v8a)
-set(ANDROID_NDK /ndk/23.1.7779620/)
-set(ANDROID_PLATFORM android-21)
-set(ANDROID_TOOLCHAIN clang)
-
-set(CMAKE_SYSTEM_NAME Android)
-set(CMAKE_SYSTEM_VERSION 21)
-set(CMAKE_ANDROID_ARCH_ABI arm64-v8a)
-set(CMAKE_ANDROID_NDK ${ANDROID_NDK})
-set(CMAKE_ANDROID_STL_TYPE c++_static)
-
-set(CMAKE_TOOLCHAIN_FILE ${CMAKE_ANDROID_NDK}/build/cmake/android.toolchain.cmake)
-set(ANDROID TRUE) # Current toolchain file doesn't set this variable which is needed by spdlog
+#set(ANDROID_ABI arm64-v8a)
+#set(ANDROID_NDK /ndk/23.1.7779620/)
+#set(ANDROID_PLATFORM android-21)
+#set(ANDROID_TOOLCHAIN clang)
+#
+#set(CMAKE_SYSTEM_NAME Android)
+#set(CMAKE_SYSTEM_VERSION 21)
+#set(CMAKE_ANDROID_ARCH_ABI arm64-v8a)
+#set(CMAKE_ANDROID_NDK ${ANDROID_NDK})
+#set(CMAKE_ANDROID_STL_TYPE c++_static)
+#
+#set(CMAKE_TOOLCHAIN_FILE ${CMAKE_ANDROID_NDK}/build/cmake/android.toolchain.cmake)
+#set(ANDROID TRUE) # Current toolchain file doesn't set this variable which is needed by spdlog
 
 project(cryfs)
 
