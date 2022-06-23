@@ -1,6 +1,6 @@
 #!/bin/sh
 
-if ls build/$2/lib/libboost_*.a 1>&2 2>/dev/null; then
+if [ $(find build/$2/lib -name libboost_*.a |wc -l) -eq 10 ]; then
 	echo "boost already built for $2";
 	exit 0
 fi
