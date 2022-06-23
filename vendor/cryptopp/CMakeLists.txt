@@ -25,5 +25,4 @@ add_custom_target(
 	BYPRODUCTS ${LIBCRYPTOPP_A}
 	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 )
-#add_dependencies(cryptopp vendor_cryptopp)
 target_link_libraries(cryptopp INTERFACE ${LIBCRYPTOPP_A})
