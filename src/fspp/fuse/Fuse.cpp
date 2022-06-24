@@ -19,11 +19,6 @@
 #include <codecvt>
 #include <boost/algorithm/string/replace.hpp>
 
-#include <range/v3/view/split.hpp>
-#include <range/v3/view/join.hpp>
-#include <range/v3/view/filter.hpp>
-#include <range/v3/range/conversion.hpp>
-
 #if defined(_MSC_VER)
 #include <dokan/dokan.h>
 #endif
@@ -480,14 +475,14 @@ int Fuse::ftruncate(int64_t size, uint64_t fh) {
   }
 }
 
-int Fuse::utimens(const bf::path &path, const std::array<timespec, 2> times) {
+int Fuse::utimens(const bf::path &path, const timespec lastAccessTime, const timespec lastModificationTime) {
   ThreadNameForDebugging _threadName("utimens");
 #ifdef FSPP_LOG
   LOG(DEBUG, "utimens({}, _)", path);
 #endif
   try {
     ASSERT(is_valid_fspp_path(path), "has to be an absolute path");
-    _fs->utimens(path, times[0], times[1]);
+    _fs->utimens(path, lastAccessTime, lastModificationTime);
 #ifdef FSPP_LOG
     LOG(DEBUG, "utimens({}, _): success", path);
 #endif
