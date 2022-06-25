@@ -1,6 +1,6 @@
 #include <jni.h>
 #include <cryfs-cli/Cli.h>
-#include "Fuse.h"
+#include <fspp/fuse/Fuse.h>
 
 using std::unique_ptr;
 using std::make_unique;
