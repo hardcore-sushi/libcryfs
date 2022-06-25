@@ -72,7 +72,6 @@ else()
     endif()
 endif()
 
-add_dependencies(${PROJECT_NAME} spdlog)
 
 find_package(Threads REQUIRED)
 target_link_libraries(${PROJECT_NAME} PUBLIC ${CMAKE_THREAD_LIBS_INIT})

@@ -35,9 +35,6 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
   install(FILES "${DOKAN_LIB_PATH}/dokan1.dll" "${DOKAN_LIB_PATH}/dokanfuse1.dll"
     DESTINATION "${CMAKE_INSTALL_BINDIR}"
   )
-
-else() # Linux and macOS
-  find_package(PkgConfig REQUIRED)
 endif()
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")

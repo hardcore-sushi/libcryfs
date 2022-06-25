@@ -141,7 +141,7 @@ extern "C" jint cryfs_readdir(JNIEnv* env, jlong fusePtr, jstring jpath, void* d
 	helper.path = boost::filesystem::path(path);
 	helper.data = data;
 	helper.filler = filler;
-	
+
 	int result = fuse->readdir(path, &helper, readDir);
 
 	env->ReleaseStringUTFChars(jpath, path);

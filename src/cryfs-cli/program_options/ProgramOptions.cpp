@@ -11,7 +11,7 @@ namespace bf = boost::filesystem;
 
 ProgramOptions::ProgramOptions(bf::path baseDir, optional<bf::path> configFile,
                                boost::filesystem::path localStateDir,
-                               bool allowFilesystemUpgrade, bool allowReplacedFilesystem, 
+                               bool allowFilesystemUpgrade, bool allowReplacedFilesystem,
                                bool createMissingBasedir,
                                optional<string> cipher,
                                optional<uint32_t> blocksizeBytes,
