@@ -1,4 +1,4 @@
-libcryfs is a re-desing of the original [CryFS](https://github.com/cryfs/cryfs) code to work as a library. Volumes are not mounted with [FUSE](https://www.kernel.org/doc/html/latest/filesystems/fuse.html) but rather opened in memory and accessed through API calls. What the purpose ?
+libcryfs is a re-design of the original [CryFS](https://github.com/cryfs/cryfs) code to work as a library. Volumes are not mounted with [FUSE](https://www.kernel.org/doc/html/latest/filesystems/fuse.html) but rather opened in memory and accessed through API calls. What the purpose ?
 - Allow the use of CryFS on platforms where FUSE is not available (such as Android)
 - Reduce attack surface by restricting volumes access to only one process rather than one user
 
