@@ -14,6 +14,7 @@ Here is what has been modified from the original project:
 - sh scripts, `cpack`, `doc`, `test` and `vendor/googletest` deleted
 - Main program `cryfs-cli` removed
 - boost build configured with [Boost-for-Android](https://github.com/moritz-wundke/Boost-for-Android)
+- Automatic version detection removed
 - Interactive mode removed (including any writes to stdout)
 - Logging output redirected to logcat
 - JNI API created in `src/jni`

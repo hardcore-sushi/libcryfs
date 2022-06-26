@@ -145,7 +145,7 @@ namespace cryfs_cli {
                 return make_shared<fspp::FilesystemImpl>(std::move(*_device));
             };
 
-            fuse = new fspp::fuse::Fuse(initFilesystem, "cryfs", "cryfs@" + options.baseDir().string());
+            fuse = new fspp::fuse::Fuse(initFilesystem);
 
 	    fuse->init();
 	    return fuse;

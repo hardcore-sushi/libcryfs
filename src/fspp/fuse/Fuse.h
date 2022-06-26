@@ -25,8 +25,7 @@ class Filesystem;
 
 class Fuse final {
 public:
-  explicit Fuse(std::function<std::shared_ptr<Filesystem> ()> init, std::string fstype, boost::optional<std::string> fsname);
-  ~Fuse();
+  explicit Fuse(std::function<std::shared_ptr<Filesystem> ()> init);
 
   bool running() const;
   void stop();
@@ -71,10 +70,7 @@ private:
 
   std::function<std::shared_ptr<Filesystem> ()> _init;
   std::shared_ptr<Filesystem> _fs;
-  std::vector<char*> _argv;
   std::atomic<bool> _running;
-  std::string _fstype;
-  boost::optional<std::string> _fsname;
   boost::optional<Context> _context;
   ::uid_t uid;
   ::gid_t gid;

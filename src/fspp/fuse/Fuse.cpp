@@ -58,16 +58,8 @@ public:
 // Remove the following line, if you don't want to output each fuse operation on the console
 //#define FSPP_LOG 1
 
-Fuse::~Fuse() {
-  for(char *arg : _argv) {
-    delete[] arg;
-    arg = nullptr;
-  }
-  _argv.clear();
-}
-
-Fuse::Fuse(std::function<shared_ptr<Filesystem> ()> init, std::string fstype, boost::optional<std::string> fsname)
-  :_init(std::move(init)), _fs(make_shared<InvalidFilesystem>()), _running(false), _fstype(std::move(fstype)), _fsname(std::move(fsname)) {
+Fuse::Fuse(std::function<shared_ptr<Filesystem> ()> init)
+  :_init(std::move(init)), _fs(make_shared<InvalidFilesystem>()), _running(false) {
   ASSERT(static_cast<bool>(_init), "Invalid init given");
 }
 

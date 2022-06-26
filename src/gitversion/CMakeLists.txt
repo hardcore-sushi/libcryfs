@@ -1,8 +1,5 @@
 project (gitversion)
 
-include(gitversion.cmake)
-get_git_version(GIT_VERSION)
-
 set(SOURCES
     gitversion.cpp
     versionstring.cpp
@@ -12,6 +9,9 @@ set(SOURCES
 
 add_library(${PROJECT_NAME} STATIC ${SOURCES})
 target_link_libraries(${PROJECT_NAME} PUBLIC boost)
+if (NOT DEFINED GIT_VERSION)
+	message(FATAL_ERROR "GIT_VERSION not defined")
+endif()
 target_compile_definitions(${PROJECT_NAME} PRIVATE GIT_VERSION_STRING="${GIT_VERSION}")
 target_add_boost(${PROJECT_NAME})
 target_enable_style_warnings(${PROJECT_NAME})
