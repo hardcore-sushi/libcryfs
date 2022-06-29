@@ -11,6 +11,7 @@
 #include <cpp-utils/io/DontEchoStdinToStdoutRAII.h>
 #include <cryfs/impl/filesystem/CryDevice.h>
 #include <cryfs/impl/config/CryConfigLoader.h>
+#include <cryfs/impl/config/CryDirectKeyProvider.h>
 #include <cryfs/impl/config/CryPresetPasswordBasedKeyProvider.h>
 #include <boost/filesystem.hpp>
 
@@ -89,9 +90,9 @@ namespace cryfs_cli {
         basedirMetadata.save();
     }
 
-    CryConfigLoader::ConfigLoadResult Cli::_loadOrCreateConfig(const ProgramOptions &options, const LocalStateDir& localStateDir, unique_ptr<string> password) {
+    CryConfigLoader::ConfigLoadResult Cli::_loadOrCreateConfig(const ProgramOptions &options, const LocalStateDir& localStateDir, Credentials credentials) {
         auto configFile = _determineConfigFile(options);
-        auto config = _loadOrCreateConfigFile(std::move(configFile), localStateDir, std::move(password), options.cipher(), options.blocksizeBytes(), options.allowFilesystemUpgrade(), options.missingBlockIsIntegrityViolation(), options.allowReplacedFilesystem());
+        auto config = _loadOrCreateConfigFile(std::move(configFile), localStateDir, credentials, options.cipher(), options.blocksizeBytes(), options.allowFilesystemUpgrade(), options.missingBlockIsIntegrityViolation(), options.allowReplacedFilesystem());
         if (config.is_left()) {
             switch(config.left()) {
                 case CryConfigFile::LoadError::DecryptionFailed:
@@ -104,24 +105,30 @@ namespace cryfs_cli {
         return std::move(config.right());
     }
 
-    either<CryConfigFile::LoadError, CryConfigLoader::ConfigLoadResult> Cli::_loadOrCreateConfigFile(bf::path configFilePath, LocalStateDir localStateDir, unique_ptr<string> password, const optional<string> &cipher, const optional<uint32_t> &blocksizeBytes, bool allowFilesystemUpgrade, const optional<bool> &missingBlockIsIntegrityViolation, bool allowReplacedFilesystem) {
-        // TODO Instead of passing in _askPasswordXXX functions to KeyProvider, only pass in console and move logic to the key provider,
-        //      for example by having a separate CryPasswordBasedKeyProvider / CryNoninteractivePasswordBasedKeyProvider.
-        auto keyProvider = make_unique_ref<CryPresetPasswordBasedKeyProvider>(
-	  *password.get(),
-          make_unique_ref<SCrypt>(_scryptSettings)
-        );
-        return CryConfigLoader(_keyGenerator, std::move(keyProvider), std::move(localStateDir), cipher, blocksizeBytes, missingBlockIsIntegrityViolation).loadOrCreate(std::move(configFilePath), allowFilesystemUpgrade, allowReplacedFilesystem);
+    unique_ref<CryKeyProvider> Cli::_createKeyProvider(Credentials credentials) {
+        if (credentials.password == none) {
+            return make_unique_ref<CryDirectKeyProvider>(credentials.givenHash);
+        } else {
+            return make_unique_ref<CryPresetPasswordBasedKeyProvider>(
+                *credentials.password,
+                make_unique_ref<SCrypt>(_scryptSettings),
+                credentials.returnedHash
+            );
+        }
     }
 
-    fspp::fuse::Fuse* Cli::initFilesystem(const ProgramOptions &options, unique_ptr<string> password) {
+    either<CryConfigFile::LoadError, CryConfigLoader::ConfigLoadResult> Cli::_loadOrCreateConfigFile(bf::path configFilePath, LocalStateDir localStateDir, Credentials credentials, const optional<string> &cipher, const optional<uint32_t> &blocksizeBytes, bool allowFilesystemUpgrade, const optional<bool> &missingBlockIsIntegrityViolation, bool allowReplacedFilesystem) {
+        return CryConfigLoader(_keyGenerator, _createKeyProvider(credentials), std::move(localStateDir), cipher, blocksizeBytes, missingBlockIsIntegrityViolation).loadOrCreate(std::move(configFilePath), allowFilesystemUpgrade, allowReplacedFilesystem);
+    }
+
+    fspp::fuse::Fuse* Cli::initFilesystem(const ProgramOptions &options, Credentials credentials) {
         cpputils::showBacktraceOnCrash();
         cpputils::set_thread_name("cryfs");
         try {
 	    _sanityChecks(options);
             LocalStateDir localStateDir(options.localStateDir());
             auto blockStore = make_unique_ref<OnDiskBlockStore2>(options.baseDir());
-            auto config = _loadOrCreateConfig(options, localStateDir, std::move(password));
+            auto config = _loadOrCreateConfig(options, localStateDir, credentials);
             fspp::fuse::Fuse* fuse = nullptr;
 
             auto onIntegrityViolation = [&fuse] () {

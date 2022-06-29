@@ -2,8 +2,6 @@
 #include <cryfs-cli/Cli.h>
 #include <fspp/fuse/Fuse.h>
 
-using std::unique_ptr;
-using std::make_unique;
 using boost::none;
 using cpputils::Random;
 using cpputils::SCrypt;
@@ -13,7 +11,10 @@ using fspp::fuse::Fuse;
 
 std::set<jlong> validFusePtrs;
 
-extern "C" jlong cryfs_init(JNIEnv* env, jstring jbaseDir, jstring jlocalStateDir, jbyteArray jpassword, jboolean createBaseDir, jstring jcipher) {
+extern "C" jlong
+cryfs_init(JNIEnv *env, jstring jbaseDir, jstring jlocalStateDir, jbyteArray jpassword,
+           jbyteArray jgivenHash, jobject jreturnedHash, jboolean createBaseDir,
+           jstring jcipher) {
 	const char* baseDir = env->GetStringUTFChars(jbaseDir, NULL);
 	const char* localStateDir = env->GetStringUTFChars(jlocalStateDir, NULL);
 	boost::optional<string> cipher = none;
@@ -22,19 +23,40 @@ extern "C" jlong cryfs_init(JNIEnv* env, jstring jbaseDir, jstring jlocalStateDi
 		cipher = boost::optional<string>(cipherName);
 		env->ReleaseStringUTFChars(jcipher, cipherName);
 	}
-        auto &keyGenerator = Random::OSRandom();
+	auto &keyGenerator = Random::OSRandom();
 	ProgramOptions options = ProgramOptions(baseDir, none, localStateDir, false, false, createBaseDir, cipher, none, false, none);
-	char* password = reinterpret_cast<char*>(env->GetByteArrayElements(jpassword, NULL));
-
-        Fuse* fuse = Cli(keyGenerator, SCrypt::DefaultSettings).initFilesystem(options, make_unique<string>(password));
-
-	env->ReleaseByteArrayElements(jpassword, reinterpret_cast<jbyte*>(password), 0);
 	env->ReleaseStringUTFChars(jbaseDir, baseDir);
 	env->ReleaseStringUTFChars(jlocalStateDir, localStateDir);
+	struct SizedData returnedHash;
+	struct Cli::Credentials credentials;
+	credentials.returnedHash = nullptr;
+	if (jpassword == NULL) {
+		credentials.password = none;
+		credentials.givenHash.data = reinterpret_cast<unsigned char*>(env->GetByteArrayElements(jgivenHash, NULL));
+		credentials.givenHash.size = env->GetArrayLength(jgivenHash);
+	} else {
+		jbyte* password = env->GetByteArrayElements(jpassword, NULL);
+		credentials.password = string(reinterpret_cast<const char*>(password));
+		env->ReleaseByteArrayElements(jpassword, password, 0);
+		if (jreturnedHash != NULL) {
+			credentials.returnedHash = &returnedHash;
+		}
+	}
 
+	Fuse* fuse = Cli(keyGenerator, SCrypt::DefaultSettings).initFilesystem(options, credentials);
+
+	if (jpassword == NULL) {
+		env->ReleaseByteArrayElements(jgivenHash, reinterpret_cast<jbyte*>(credentials.givenHash.data), 0);
+	}
 	jlong fusePtr = reinterpret_cast<jlong>(fuse);
 	if (fusePtr != 0) {
 		validFusePtrs.insert(fusePtr);
+		if (credentials.returnedHash != nullptr) {
+			jfieldID value = env->GetFieldID(env->GetObjectClass(jreturnedHash), "value", "Ljava/lang/Object;");
+			jbyteArray jpasswordHash = env->NewByteArray(returnedHash.size);
+			env->SetByteArrayRegion(jpasswordHash, 0, returnedHash.size, reinterpret_cast<const jbyte*>(returnedHash.data));
+			env->SetObjectField(jreturnedHash, value, jpasswordHash);
+		}
 	}
 	return fusePtr;
 }
