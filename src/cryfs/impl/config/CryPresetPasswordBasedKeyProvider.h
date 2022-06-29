@@ -21,6 +21,8 @@ namespace cryfs {
         KeyResult requestKeyForNewFilesystem(size_t keySize) override;
 
     private:
+        void saveEncryptionKey(cpputils::EncryptionKey encryptionKey);
+
         std::string _password;
         cpputils::unique_ref<cpputils::PasswordBasedKDF> _kdf;
         SizedData* _returnedHash;

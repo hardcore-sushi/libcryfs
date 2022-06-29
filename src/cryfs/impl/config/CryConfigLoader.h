@@ -26,6 +26,7 @@ public:
 
   cpputils::either<CryConfigFile::LoadError, CryConfigLoader::ConfigLoadResult> loadOrCreate(boost::filesystem::path filename, bool allowFilesystemUpgrade, bool allowReplacedFilesystem);
   cpputils::either<CryConfigFile::LoadError, CryConfigLoader::ConfigLoadResult> load(boost::filesystem::path filename, bool allowFilesystemUpgrade, bool allowReplacedFilesystem, CryConfigFile::Access access);
+  boost::optional<CryConfigFile::LoadError> changeEncryptionKey(boost::filesystem::path filename, bool allowFilesystemUpgrade, bool allowReplacedFilesystem, cpputils::unique_ref<CryKeyProvider> newKeyProvider);
 
 private:
     cpputils::either<CryConfigFile::LoadError, CryConfigLoader::ConfigLoadResult> _loadConfig(boost::filesystem::path filename, bool allowFilesystemUpgrade, bool allowReplacedFilesystem, CryConfigFile::Access access);

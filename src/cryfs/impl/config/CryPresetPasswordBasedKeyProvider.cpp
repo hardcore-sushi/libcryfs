@@ -11,21 +11,23 @@ namespace cryfs {
 CryPresetPasswordBasedKeyProvider::CryPresetPasswordBasedKeyProvider(std::string password, unique_ref<PasswordBasedKDF> kdf, SizedData* returnedHash)
 : _password(std::move(password)), _kdf(std::move(kdf)), _returnedHash(returnedHash) {}
 
+void CryPresetPasswordBasedKeyProvider::saveEncryptionKey(EncryptionKey encryptionKey) {
+    if (_returnedHash != nullptr) {
+        _returnedHash->size = encryptionKey.binaryLength();
+        _returnedHash->data = new unsigned char[_returnedHash->size];
+        memcpy(_returnedHash->data, encryptionKey.data(), _returnedHash->size);
+    }
+}
+
 EncryptionKey CryPresetPasswordBasedKeyProvider::requestKeyForExistingFilesystem(size_t keySize, const Data& kdfParameters) {
     EncryptionKey encryptionKey = _kdf->deriveExistingKey(keySize, _password, kdfParameters);
-    if (_returnedHash != nullptr) {
-        _returnedHash->data = static_cast<unsigned char*>(encryptionKey.data());
-        _returnedHash->size = encryptionKey.binaryLength();
-    }
+    saveEncryptionKey(encryptionKey);
     return encryptionKey;
 }
 
 CryPresetPasswordBasedKeyProvider::KeyResult CryPresetPasswordBasedKeyProvider::requestKeyForNewFilesystem(size_t keySize) {
     auto keyResult = _kdf->deriveNewKey(keySize, _password);
-    if (_returnedHash != nullptr) {
-        _returnedHash->data = static_cast<unsigned char*>(keyResult.key.data());
-        _returnedHash->size = keyResult.key.binaryLength();
-    }
+    saveEncryptionKey(keyResult.key);
     return {std::move(keyResult.key), std::move(keyResult.kdfParameters)};
 }
 

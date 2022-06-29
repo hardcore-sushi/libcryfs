@@ -1,6 +1,9 @@
 #include <jni.h>
 #include <cryfs-cli/Cli.h>
 #include <fspp/fuse/Fuse.h>
+#include <cryfs/impl/config/CryKeyProvider.h>
+#include <cryfs/impl/config/CryDirectKeyProvider.h>
+#include <cryfs/impl/config/CryPresetPasswordBasedKeyProvider.h>
 
 using boost::none;
 using cpputils::Random;
@@ -10,6 +13,14 @@ using cryfs_cli::program_options::ProgramOptions;
 using fspp::fuse::Fuse;
 
 std::set<jlong> validFusePtrs;
+
+void setReturnedPasswordHash(JNIEnv* env, jobject jreturnedHash, const SizedData& returnedHash) {
+	jfieldID value = env->GetFieldID(env->GetObjectClass(jreturnedHash), "value", "Ljava/lang/Object;");
+	jbyteArray jpasswordHash = env->NewByteArray(returnedHash.size);
+	env->SetByteArrayRegion(jpasswordHash, 0, returnedHash.size, reinterpret_cast<const jbyte*>(returnedHash.data));
+	delete[] returnedHash.data;
+	env->SetObjectField(jreturnedHash, value, jpasswordHash);
+}
 
 extern "C" jlong
 cryfs_init(JNIEnv *env, jstring jbaseDir, jstring jlocalStateDir, jbyteArray jpassword,
@@ -48,17 +59,63 @@ cryfs_init(JNIEnv *env, jstring jbaseDir, jstring jlocalStateDir, jbyteArray jpa
 	if (jpassword == NULL) {
 		env->ReleaseByteArrayElements(jgivenHash, reinterpret_cast<jbyte*>(credentials.givenHash.data), 0);
 	}
+	if (credentials.returnedHash != nullptr) {
+		setReturnedPasswordHash(env, jreturnedHash, returnedHash);
+	}
 	jlong fusePtr = reinterpret_cast<jlong>(fuse);
 	if (fusePtr != 0) {
 		validFusePtrs.insert(fusePtr);
-		if (credentials.returnedHash != nullptr) {
-			jfieldID value = env->GetFieldID(env->GetObjectClass(jreturnedHash), "value", "Ljava/lang/Object;");
-			jbyteArray jpasswordHash = env->NewByteArray(returnedHash.size);
-			env->SetByteArrayRegion(jpasswordHash, 0, returnedHash.size, reinterpret_cast<const jbyte*>(returnedHash.data));
-			env->SetObjectField(jreturnedHash, value, jpasswordHash);
-		}
 	}
 	return fusePtr;
+}
+
+extern "C" jboolean cryfs_change_encryption_key(JNIEnv* env, jstring jbaseDir, jstring jlocalStateDir,
+                                                jbyteArray jcurrentPassword, jbyteArray jgivenHash,
+                                                jbyteArray jnewPassword, jobject jreturnedHash) {
+	using namespace cryfs;
+
+	const char* baseDir = env->GetStringUTFChars(jbaseDir, NULL);
+	const char* localStateDir = env->GetStringUTFChars(jlocalStateDir, NULL);
+
+	struct SizedData givenHash;
+	std::unique_ptr<CryKeyProvider> currentKeyProvider;
+	if (jcurrentPassword == NULL) {
+		givenHash.data = reinterpret_cast<unsigned char*>(env->GetByteArrayElements(jgivenHash, NULL));
+		givenHash.size = env->GetArrayLength(jgivenHash);
+		currentKeyProvider = std::make_unique<CryDirectKeyProvider>(givenHash);
+	} else {
+		jbyte* currentPassword = env->GetByteArrayElements(jcurrentPassword, NULL);
+		currentKeyProvider = std::make_unique<CryPresetPasswordBasedKeyProvider>(
+			reinterpret_cast<const char*>(currentPassword),
+			cpputils::make_unique_ref<SCrypt>(SCrypt::DefaultSettings),
+			nullptr
+		);
+		env->ReleaseByteArrayElements(jcurrentPassword, currentPassword, 0);
+	}
+	struct SizedData returnedHash = {nullptr, 0};
+	jbyte* newPassword = env->GetByteArrayElements(jnewPassword, NULL);
+	cpputils::unique_ref<CryKeyProvider> newKeyProvider = cpputils::make_unique_ref<CryPresetPasswordBasedKeyProvider>(
+		reinterpret_cast<const char*>(newPassword),
+		cpputils::make_unique_ref<SCrypt>(SCrypt::DefaultSettings),
+		jreturnedHash == NULL ? nullptr : &returnedHash
+	);
+	env->ReleaseByteArrayElements(jnewPassword, newPassword, 0);
+	CryConfigLoader configLoader = CryConfigLoader(
+		Random::OSRandom(), std::move(*cpputils::nullcheck(std::move(currentKeyProvider))),
+		LocalStateDir(localStateDir), none, none, none
+	);
+	env->ReleaseStringUTFChars(jlocalStateDir, localStateDir);
+
+	auto result = configLoader.changeEncryptionKey(boost::filesystem::path(baseDir) / "cryfs.config", false, false, std::move(newKeyProvider));
+
+	if (jcurrentPassword == NULL) {
+		env->ReleaseByteArrayElements(jgivenHash, reinterpret_cast<jbyte*>(givenHash.data), 0);
+	}
+	env->ReleaseStringUTFChars(jbaseDir, baseDir);
+	if (returnedHash.data != nullptr) {
+		setReturnedPasswordHash(env, jreturnedHash, returnedHash);
+	}
+	return result == none;
 }
 
 extern "C" jlong cryfs_create(JNIEnv* env, jlong fusePtr, jstring jpath, mode_t mode) {

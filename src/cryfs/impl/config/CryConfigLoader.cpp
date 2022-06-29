@@ -93,8 +93,6 @@ void CryConfigLoader::_checkMissingBlocksAreIntegrityViolations(CryConfigFile *c
   auto exclusiveClientId = configFile->config()->ExclusiveClientId();
   if (exclusiveClientId != none && *exclusiveClientId != myClientId) {
     throw CryfsException("File system is in single-client mode and can only be used from the client that created it.", ErrorCode::SingleClientFileSystem);
-    configFile->config()->SetExclusiveClientId(none);
-    configFile->save();
   }
 }
 
@@ -108,6 +106,15 @@ either<CryConfigFile::LoadError, CryConfigLoader::ConfigLoadResult> CryConfigLoa
   } else {
     return _createConfig(std::move(filename), allowReplacedFilesystem);
   }
+}
+
+boost::optional<CryConfigFile::LoadError> CryConfigLoader::changeEncryptionKey(bf::path filename, bool allowFilesystemUpgrade, bool allowReplacedFilesystem, unique_ref<CryKeyProvider> newKeyProvider) {
+  auto config = _loadConfig(filename, allowFilesystemUpgrade, allowReplacedFilesystem, CryConfigFile::Access::ReadWrite);
+  if (config.is_left()) {
+    return config.left();
+  }
+  CryConfigFile(filename, *config.right().configFile->config(), CryConfigEncryptorFactory::deriveNewKey(newKeyProvider.get()), CryConfigFile::Access::ReadWrite).save();
+  return none;
 }
 
 CryConfigLoader::ConfigLoadResult CryConfigLoader::_createConfig(bf::path filename, bool allowReplacedFilesystem) {
