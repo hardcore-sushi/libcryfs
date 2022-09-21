@@ -47,7 +47,7 @@ cryfs_init(JNIEnv *env, jstring jbaseDir, jstring jlocalStateDir, jbyteArray jpa
 		credentials.givenHash.size = env->GetArrayLength(jgivenHash);
 	} else {
 		jbyte* password = env->GetByteArrayElements(jpassword, NULL);
-		credentials.password = string(reinterpret_cast<const char*>(password));
+		credentials.password = string(reinterpret_cast<const char*>(password), env->GetArrayLength(jpassword));
 		env->ReleaseByteArrayElements(jpassword, password, 0);
 		if (jreturnedHash != NULL) {
 			credentials.returnedHash = &returnedHash;
@@ -86,7 +86,7 @@ extern "C" jboolean cryfs_change_encryption_key(JNIEnv* env, jstring jbaseDir, j
 	} else {
 		jbyte* currentPassword = env->GetByteArrayElements(jcurrentPassword, NULL);
 		currentKeyProvider = std::make_unique<CryPresetPasswordBasedKeyProvider>(
-			reinterpret_cast<const char*>(currentPassword),
+			string(reinterpret_cast<const char*>(currentPassword), env->GetArrayLength(jcurrentPassword)),
 			cpputils::make_unique_ref<SCrypt>(SCrypt::DefaultSettings),
 			nullptr
 		);
@@ -95,7 +95,7 @@ extern "C" jboolean cryfs_change_encryption_key(JNIEnv* env, jstring jbaseDir, j
 	struct SizedData returnedHash = {nullptr, 0};
 	jbyte* newPassword = env->GetByteArrayElements(jnewPassword, NULL);
 	cpputils::unique_ref<CryKeyProvider> newKeyProvider = cpputils::make_unique_ref<CryPresetPasswordBasedKeyProvider>(
-		reinterpret_cast<const char*>(newPassword),
+		string(reinterpret_cast<const char*>(newPassword), env->GetArrayLength(jnewPassword)),
 		cpputils::make_unique_ref<SCrypt>(SCrypt::DefaultSettings),
 		jreturnedHash == NULL ? nullptr : &returnedHash
 	);
