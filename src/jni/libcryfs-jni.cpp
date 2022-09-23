@@ -148,22 +148,21 @@ extern "C" jlong cryfs_open(JNIEnv* env, jlong fusePtr, jstring jpath, jint flag
 	}
 }
 
-extern "C" jint cryfs_read(JNIEnv* env, jlong fusePtr, jlong fileHandle, jbyteArray jbuffer, jlong offset) {
+extern "C" jint cryfs_read(JNIEnv* env, jlong fusePtr, jlong fileHandle, jlong fileOffset, jbyteArray jbuffer, jlong dstOffset, jlong length) {
 	Fuse* fuse = reinterpret_cast<Fuse*>(fusePtr);
-	const jsize size = env->GetArrayLength(jbuffer);
 	char* buff = reinterpret_cast<char*>(env->GetByteArrayElements(jbuffer, NULL));
 
-	int result = fuse->read(buff, size, offset, fileHandle);
+	int result = fuse->read(buff+dstOffset, length, fileOffset, fileHandle);
 
 	env->ReleaseByteArrayElements(jbuffer, reinterpret_cast<jbyte*>(buff), 0);
 	return result;
 }
 
-extern "C" jint cryfs_write(JNIEnv* env, jlong fusePtr, jlong fileHandle, jlong offset, jbyteArray jbuffer, jint size) {
+extern "C" jint cryfs_write(JNIEnv* env, jlong fusePtr, jlong fileHandle, jlong fileOffset, jbyteArray jbuffer, jlong srcOffset, jlong length) {
 	Fuse* fuse = reinterpret_cast<Fuse*>(fusePtr);
 	char* buff = reinterpret_cast<char*>(env->GetByteArrayElements(jbuffer, NULL));
 
-	int result = fuse->write(buff, size, offset, fileHandle);
+	int result = fuse->write(buff+srcOffset, length, fileOffset, fileHandle);
 
 	env->ReleaseByteArrayElements(jbuffer, reinterpret_cast<jbyte*>(buff), 0);
 	return result;

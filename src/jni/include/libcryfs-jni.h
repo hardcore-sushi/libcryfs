@@ -9,8 +9,8 @@ jboolean cryfs_change_encryption_key(JNIEnv *env,
         jbyteArray jnewPassword, jobject jreturnedHash);
 jlong cryfs_create(JNIEnv* env, jlong fusePtr, jstring jpath, mode_t mode);
 jlong cryfs_open(JNIEnv* env, jlong fusePtr, jstring jpath, jint flags);
-jint cryfs_read(JNIEnv* env, jlong fusePtr, jlong fileHandle, jbyteArray jbuffer, jlong offset);
-jint cryfs_write(JNIEnv* env, jlong fusePtr, jlong fileHandle, jlong offset, jbyteArray jbuffer, jint size);
+jint cryfs_read(JNIEnv* env, jlong fusePtr, jlong fileHandle, jlong fileOffset, jbyteArray buffer, jlong dstOffset, jlong length);
+jint cryfs_write(JNIEnv* env, jlong fusePtr, jlong fileHandle, jlong fileOffset, jbyteArray buffer, jlong srcOffset, jlong length);
 jint cryfs_truncate(JNIEnv* env, jlong fusePtr, jstring jpath, jlong size);
 jint cryfs_unlink(JNIEnv* env, jlong fusePtr, jstring jpath);
 jint cryfs_release(jlong fusePtr, jlong fileHandle);
