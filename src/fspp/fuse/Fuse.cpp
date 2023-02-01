@@ -190,14 +190,14 @@ int Fuse::readlink(const bf::path &path, char *buf, size_t size) {
 int Fuse::mkdir(const bf::path &path, ::mode_t mode) {
   ThreadNameForDebugging _threadName("mkdir");
 #ifdef FSPP_LOG
-  LOG(DEBUG, "mkdir({}, {})", path, mode);
+  LOG(DEBUG, "mkdir({}, {})", path.string(), mode);
 #endif
   try {
     ASSERT(is_valid_fspp_path(path), "has to be an absolute path");
 	// DokanY seems to call mkdir("/"). Ignore that
 	if ("/" == path) {
 #ifdef FSPP_LOG
-        LOG(DEBUG, "mkdir({}, {}): ignored", path, mode);
+        LOG(DEBUG, "mkdir({}, {}): ignored", path.string(), mode);
 #endif
 		return 0;
 	}
@@ -344,7 +344,7 @@ int Fuse::rename(const bf::path &from, const bf::path &to) {
 //TODO
 int Fuse::link(const bf::path &from, const bf::path &to) {
   ThreadNameForDebugging _threadName("link");
-  LOG(WARN, "NOT IMPLEMENTED: link({}, {})", from, to);
+  LOG(WARN, "NOT IMPLEMENTED: link({}, {})", from.string(), to.string());
   //auto real_from = _impl->RootDir() / from;
   //auto real_to = _impl->RootDir() / to;
   //int retstat = ::link(real_from.string().c_str(), real_to.string().c_str());
