@@ -43,7 +43,7 @@ if(MSVC)
 endif()
 
 # Hardcoded version. Don't forget to change this when merging upstream!
-set(GIT_VERSION "0.11.2-libcryfs")
+set(GIT_VERSION "0.11.3-libcryfs")
 
 add_subdirectory(vendor EXCLUDE_FROM_ALL)
 add_subdirectory(src)
