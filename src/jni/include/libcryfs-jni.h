@@ -2,7 +2,7 @@
 
 jlong cryfs_init(JNIEnv *env, jstring jbaseDir, jstring jlocalSateDir, jbyteArray jpassword,
                  jbyteArray jgivenHash, jobject returnedHash, jboolean createBaseDir,
-                 jstring jcipher);
+                 jstring jcipher, jobject jerrorCode);
 jboolean cryfs_change_encryption_key(JNIEnv *env,
         jstring jbaseDir, jstring jlocalStateDir,
         jbyteArray jcurrentPassword, jbyteArray jgivenHash,

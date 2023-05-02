@@ -157,9 +157,7 @@ namespace cryfs_cli {
 	    fuse->init();
 	    return fuse;
         } catch (const CryfsException &e) {
-            if (e.what() != string()) {
-              LOG(ERR, "Error {}: {}", static_cast<int>(e.errorCode()), e.what());
-            }
+            throw; // CryfsException is only thrown if setup goes wrong. Throw it through so that we get the correct process exit code.
         } catch (const std::exception &e) {
             LOG(ERR, "Crashed: {}", e.what());
         } catch (...) {

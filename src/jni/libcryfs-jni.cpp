@@ -1,6 +1,7 @@
 #include <jni.h>
 #include <cryfs-cli/Cli.h>
 #include <fspp/fuse/Fuse.h>
+#include <cryfs/impl/CryfsException.h>
 #include <cryfs/impl/config/CryKeyProvider.h>
 #include <cryfs/impl/config/CryDirectKeyProvider.h>
 #include <cryfs/impl/config/CryPresetPasswordBasedKeyProvider.h>
@@ -14,18 +15,21 @@ using fspp::fuse::Fuse;
 
 std::set<jlong> validFusePtrs;
 
+jfieldID getValueField(JNIEnv* env, jobject object) {
+	return env->GetFieldID(env->GetObjectClass(object), "value", "Ljava/lang/Object;");
+}
+
 void setReturnedPasswordHash(JNIEnv* env, jobject jreturnedHash, const SizedData& returnedHash) {
-	jfieldID value = env->GetFieldID(env->GetObjectClass(jreturnedHash), "value", "Ljava/lang/Object;");
 	jbyteArray jpasswordHash = env->NewByteArray(returnedHash.size);
 	env->SetByteArrayRegion(jpasswordHash, 0, returnedHash.size, reinterpret_cast<const jbyte*>(returnedHash.data));
 	delete[] returnedHash.data;
-	env->SetObjectField(jreturnedHash, value, jpasswordHash);
+	env->SetObjectField(jreturnedHash, getValueField(env, jreturnedHash), jpasswordHash);
 }
 
 extern "C" jlong
 cryfs_init(JNIEnv *env, jstring jbaseDir, jstring jlocalStateDir, jbyteArray jpassword,
            jbyteArray jgivenHash, jobject jreturnedHash, jboolean createBaseDir,
-           jstring jcipher) {
+           jstring jcipher, jobject jerrorCode) {
 	const char* baseDir = env->GetStringUTFChars(jbaseDir, NULL);
 	const char* localStateDir = env->GetStringUTFChars(jlocalStateDir, NULL);
 	boost::optional<string> cipher = none;
@@ -54,8 +58,18 @@ cryfs_init(JNIEnv *env, jstring jbaseDir, jstring jlocalStateDir, jbyteArray jpa
 		}
 	}
 
-	Fuse* fuse = Cli(keyGenerator, SCrypt::DefaultSettings).initFilesystem(options, credentials);
-
+	Fuse* fuse = 0;
+	try {
+		fuse = Cli(keyGenerator, SCrypt::DefaultSettings).initFilesystem(options, credentials);
+	} catch (const cryfs::CryfsException &e) {
+		int errorCode = static_cast<int>(e.errorCode());
+		if (e.what() != string()) {
+			LOG(cpputils::logging::ERR, "Error {}: {}", errorCode, e.what());
+		}
+		jclass integerClass = env->FindClass("java/lang/Integer");
+		jobject integer = env->NewObject(integerClass, env->GetMethodID(integerClass, "<init>", "(I)V"), errorCode);
+		env->SetObjectField(jerrorCode, getValueField(env, jerrorCode), integer);
+	}
 	if (jpassword == NULL) {
 		env->ReleaseByteArrayElements(jgivenHash, reinterpret_cast<jbyte*>(credentials.givenHash.data), 0);
 	}
