@@ -45,6 +45,19 @@ void _save(const bf::path &metadataFilePath, const ptree& data) {
 }
 
 string jsonPathForBasedir(const bf::path &basedir) {
+#ifdef __ANDROID__
+  // if basedir starts with /mnt/media_rw
+  if (basedir.string().rfind("/mnt/media_rw", 0) == 0) {
+    // Android returns permission denied when attempting to stat() /mnt/media_rw for some reason
+    // (even with "all files access") so checking if /mnt/media_rw is a symlink, as canonical()
+    // would, results in an error. Because we know /mnt/media_rw is not a symlink, and Android
+    // doesn't support removable storage filesystems that support symlinks, the canonical path
+    // for any path starting with /mnt/media_rw is equal to the absolute path after normalization
+    // (removal of "../" and "./" elements).
+    // See: https://github.com/hardcore-sushi/DroidFS/issues/281
+    return bf::absolute(basedir).lexically_normal().string() + ".filesystemId";
+  }
+#endif
   return bf::canonical(basedir).string() + ".filesystemId";
 }
 
