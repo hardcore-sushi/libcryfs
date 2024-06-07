@@ -45,7 +45,7 @@ bool is_valid_fspp_path(const bf::path& path) {
 class ThreadNameForDebugging final {
 public:
   ThreadNameForDebugging(const string& threadName) {
-    std::string name = "fspp_" + threadName;
+    const std::string name = "fspp_" + threadName;
     set_thread_name(name.c_str());
   }
 
@@ -87,7 +87,7 @@ bool Fuse::running() const {
 }
 
 int Fuse::getattr(const bf::path &path, fspp::fuse::STAT *stbuf) {
-  ThreadNameForDebugging _threadName("getattr");
+  const ThreadNameForDebugging _threadName("getattr");
 #ifdef FSPP_LOG
   LOG(DEBUG, "getattr({}, _, _)", path);
 #endif
@@ -116,7 +116,7 @@ int Fuse::getattr(const bf::path &path, fspp::fuse::STAT *stbuf) {
 }
 
 int Fuse::fgetattr(const bf::path &path, fspp::fuse::STAT *stbuf, uint64_t fh) {
-  ThreadNameForDebugging _threadName("fgetattr");
+  const ThreadNameForDebugging _threadName("fgetattr");
 #ifdef FSPP_LOG
   LOG(DEBUG, "fgetattr({}, _, _)", path);
 #endif
@@ -127,7 +127,7 @@ int Fuse::fgetattr(const bf::path &path, fspp::fuse::STAT *stbuf, uint64_t fh) {
   // underlying base directory instead of doing the fgetattr().
   // TODO Check if necessary
   if (path.string() == "/") {
-    int result = getattr(path, stbuf);
+    const int result = getattr(path, stbuf);
 #ifdef FSPP_LOG
     LOG(DEBUG, "fgetattr({}, _, _): success", path);
 #endif
@@ -159,7 +159,7 @@ int Fuse::fgetattr(const bf::path &path, fspp::fuse::STAT *stbuf, uint64_t fh) {
 }
 
 int Fuse::readlink(const bf::path &path, char *buf, size_t size) {
-  ThreadNameForDebugging _threadName("readlink");
+  const ThreadNameForDebugging _threadName("readlink");
 #ifdef FSPP_LOG
   LOG(DEBUG, "readlink({}, _, {})", path, size);
 #endif
@@ -188,7 +188,7 @@ int Fuse::readlink(const bf::path &path, char *buf, size_t size) {
 }
 
 int Fuse::mkdir(const bf::path &path, ::mode_t mode) {
-  ThreadNameForDebugging _threadName("mkdir");
+  const ThreadNameForDebugging _threadName("mkdir");
 #ifdef FSPP_LOG
   LOG(DEBUG, "mkdir({}, {})", path.string(), mode);
 #endif
@@ -225,7 +225,7 @@ int Fuse::mkdir(const bf::path &path, ::mode_t mode) {
 }
 
 int Fuse::unlink(const bf::path &path) {
-  ThreadNameForDebugging _threadName("unlink");
+  const ThreadNameForDebugging _threadName("unlink");
 #ifdef FSPP_LOG
   LOG(DEBUG, "unlink({})", path);
 #endif
@@ -254,7 +254,7 @@ int Fuse::unlink(const bf::path &path) {
 }
 
 int Fuse::rmdir(const bf::path &path) {
-  ThreadNameForDebugging _threadName("rmdir");
+  const ThreadNameForDebugging _threadName("rmdir");
 #ifdef FSPP_LOG
   LOG(DEBUG, "rmdir({})", path);
 #endif
@@ -283,7 +283,7 @@ int Fuse::rmdir(const bf::path &path) {
 }
 
 int Fuse::symlink(const bf::path &to, const bf::path &from) {
-  ThreadNameForDebugging _threadName("symlink");
+  const ThreadNameForDebugging _threadName("symlink");
 #ifdef FSPP_LOG
   LOG(DEBUG, "symlink({}, {})", to, from);
 #endif
@@ -312,7 +312,7 @@ int Fuse::symlink(const bf::path &to, const bf::path &from) {
 }
 
 int Fuse::rename(const bf::path &from, const bf::path &to) {
-  ThreadNameForDebugging _threadName("rename");
+  const ThreadNameForDebugging _threadName("rename");
 #ifdef FSPP_LOG
   LOG(DEBUG, "rename({}, {})", from, to);
 #endif
@@ -343,7 +343,7 @@ int Fuse::rename(const bf::path &from, const bf::path &to) {
 
 //TODO
 int Fuse::link(const bf::path &from, const bf::path &to) {
-  ThreadNameForDebugging _threadName("link");
+  const ThreadNameForDebugging _threadName("link");
   LOG(WARN, "NOT IMPLEMENTED: link({}, {})", from.string(), to.string());
   //auto real_from = _impl->RootDir() / from;
   //auto real_to = _impl->RootDir() / to;
@@ -353,7 +353,7 @@ int Fuse::link(const bf::path &from, const bf::path &to) {
 }
 
 int Fuse::chmod(const bf::path &path, ::mode_t mode) {
-  ThreadNameForDebugging _threadName("chmod");
+  const ThreadNameForDebugging _threadName("chmod");
 #ifdef FSPP_LOG
   LOG(DEBUG, "chmod({}, {})", path, mode);
 #endif
@@ -382,7 +382,7 @@ int Fuse::chmod(const bf::path &path, ::mode_t mode) {
 }
 
 int Fuse::chown(const bf::path &path, ::uid_t uid, ::gid_t gid) {
-  ThreadNameForDebugging _threadName("chown");
+  const ThreadNameForDebugging _threadName("chown");
 #ifdef FSPP_LOG
   LOG(DEBUG, "chown({}, {}, {})", path, uid, gid);
 #endif
@@ -411,7 +411,7 @@ int Fuse::chown(const bf::path &path, ::uid_t uid, ::gid_t gid) {
 }
 
 int Fuse::truncate(const bf::path &path, int64_t size) {
-  ThreadNameForDebugging _threadName("truncate");
+  const ThreadNameForDebugging _threadName("truncate");
 #ifdef FSPP_LOG
   LOG(DEBUG, "truncate({}, {})", path, size);
 #endif
@@ -440,7 +440,7 @@ int Fuse::truncate(const bf::path &path, int64_t size) {
 }
 
 int Fuse::ftruncate(int64_t size, uint64_t fh) {
-  ThreadNameForDebugging _threadName("ftruncate");
+  const ThreadNameForDebugging _threadName("ftruncate");
 #ifdef FSPP_LOG
   LOG(DEBUG, "ftruncate({}, {})", fh, size);
 #endif
@@ -468,7 +468,7 @@ int Fuse::ftruncate(int64_t size, uint64_t fh) {
 }
 
 int Fuse::utimens(const bf::path &path, const timespec lastAccessTime, const timespec lastModificationTime) {
-  ThreadNameForDebugging _threadName("utimens");
+  const ThreadNameForDebugging _threadName("utimens");
 #ifdef FSPP_LOG
   LOG(DEBUG, "utimens({}, _)", path);
 #endif
@@ -497,7 +497,7 @@ int Fuse::utimens(const bf::path &path, const timespec lastAccessTime, const tim
 }
 
 int Fuse::open(const bf::path &path, uint64_t* fh, int flags) {
-  ThreadNameForDebugging _threadName("open");
+  const ThreadNameForDebugging _threadName("open");
 #ifdef FSPP_LOG
   LOG(DEBUG, "open({}, _)", path);
 #endif
@@ -526,7 +526,7 @@ int Fuse::open(const bf::path &path, uint64_t* fh, int flags) {
 }
 
 int Fuse::release(uint64_t fh) {
-  ThreadNameForDebugging _threadName("release");
+  const ThreadNameForDebugging _threadName("release");
 #ifdef FSPP_LOG
   LOG(DEBUG, "release({}, _)", fh);
 #endif
@@ -554,12 +554,12 @@ int Fuse::release(uint64_t fh) {
 }
 
 int Fuse::read(char *buf, size_t size, int64_t offset, uint64_t fh) {
-  ThreadNameForDebugging _threadName("read");
+  const ThreadNameForDebugging _threadName("read");
 #ifdef FSPP_LOG
   LOG(DEBUG, "read({}, _, {}, {}, _)", fh, size, offset);
 #endif
   try {
-    int result = _fs->read(fh, buf, fspp::num_bytes_t(size), fspp::num_bytes_t(offset)).value();
+    const int result = _fs->read(fh, buf, fspp::num_bytes_t(size), fspp::num_bytes_t(offset)).value();
 #ifdef FSPP_LOG
     LOG(DEBUG, "read({}, _, {}, {}, _): success with {}", fh, size, offset, result);
 #endif
@@ -582,7 +582,7 @@ int Fuse::read(char *buf, size_t size, int64_t offset, uint64_t fh) {
 }
 
 int Fuse::write(const char *buf, size_t size, int64_t offset, uint64_t fh) {
-  ThreadNameForDebugging _threadName("write");
+  const ThreadNameForDebugging _threadName("write");
 #ifdef FSPP_LOG
   LOG(DEBUG, "write({}, _, {}, {}, _)", fh, size, offset);
 #endif
@@ -610,7 +610,7 @@ int Fuse::write(const char *buf, size_t size, int64_t offset, uint64_t fh) {
 }
 
 int Fuse::statfs(const bf::path &path, struct ::statvfs *fsstat) {
-  ThreadNameForDebugging _threadName("statfs");
+  const ThreadNameForDebugging _threadName("statfs");
 #ifdef FSPP_LOG
   LOG(DEBUG, "statfs({}, _)", path);
 #endif
@@ -639,7 +639,7 @@ int Fuse::statfs(const bf::path &path, struct ::statvfs *fsstat) {
 }
 
 int Fuse::flush(uint64_t fh) {
-  ThreadNameForDebugging _threadName("flush");
+  const ThreadNameForDebugging _threadName("flush");
 #ifdef FSPP_LOG
   LOG(WARN, "flush({}, _)", fh);
 #endif
@@ -667,7 +667,7 @@ int Fuse::flush(uint64_t fh) {
 }
 
 int Fuse::fsync(int datasync, uint64_t fh) {
-  ThreadNameForDebugging _threadName("fsync");
+  const ThreadNameForDebugging _threadName("fsync");
 #ifdef FSPP_LOG
   LOG(DEBUG, "fsync({}, {}, _)", fh, datasync);
 #endif
@@ -699,7 +699,7 @@ int Fuse::fsync(int datasync, uint64_t fh) {
 }
 
 int Fuse::readdir(const bf::path &path, void *buf, fuse_fill_dir_t filler) {
-  ThreadNameForDebugging _threadName("readdir");
+  const ThreadNameForDebugging _threadName("readdir");
 #ifdef FSPP_LOG
   LOG(DEBUG, "readdir({}, _, _)", path);
 #endif
@@ -750,7 +750,7 @@ int Fuse::readdir(const bf::path &path, void *buf, fuse_fill_dir_t filler) {
 }
 
 void Fuse::init() {
-  ThreadNameForDebugging _threadName("init");
+  const ThreadNameForDebugging _threadName("init");
   _fs = _init();
 
   _context = Context(noatime());
@@ -767,7 +767,7 @@ void Fuse::init() {
 }
 
 void Fuse::destroy() {
-  ThreadNameForDebugging _threadName("destroy");
+  const ThreadNameForDebugging _threadName("destroy");
   _fs = make_shared<InvalidFilesystem>();
   LOG(INFO, "Filesystem stopped.");
   _running = false;
@@ -775,7 +775,7 @@ void Fuse::destroy() {
 }
 
 int Fuse::access(const bf::path &path, int mask) {
-  ThreadNameForDebugging _threadName("access");
+  const ThreadNameForDebugging _threadName("access");
 #ifdef FSPP_LOG
   LOG(DEBUG, "access({}, {})", path, mask);
 #endif
@@ -804,7 +804,7 @@ int Fuse::access(const bf::path &path, int mask) {
 }
 
 int Fuse::create(const bf::path &path, ::mode_t mode, uint64_t* fh) {
-  ThreadNameForDebugging _threadName("create");
+  const ThreadNameForDebugging _threadName("create");
 #ifdef FSPP_LOG
   LOG(DEBUG, "create({}, {}, _)", path, mode);
 #endif

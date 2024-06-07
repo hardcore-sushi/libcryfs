@@ -81,6 +81,11 @@ vector<fspp::Dir::Entry> CryDir::children() {
   return children;
 }
 
+size_t CryDir::numChildren() {
+  auto blob = LoadBlob();
+  return blob->NumChildren();
+}
+
 fspp::Dir::EntryType CryDir::getType() const {
   device()->callFsActionCallbacks();
   return fspp::Dir::EntryType::DIR;

@@ -126,7 +126,7 @@ namespace cryfs_cli {
         cpputils::set_thread_name("cryfs");
         try {
 	    _sanityChecks(options);
-            LocalStateDir localStateDir(options.localStateDir());
+            const LocalStateDir localStateDir(options.localStateDir());
             auto blockStore = make_unique_ref<OnDiskBlockStore2>(options.baseDir());
             auto config = _loadOrCreateConfig(options, localStateDir, credentials);
             fspp::fuse::Fuse* fuse = nullptr;

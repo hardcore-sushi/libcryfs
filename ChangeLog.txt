@@ -1,3 +1,19 @@
+Version 0.12.0 (unreleased)
+---------------
+* Added a man page for `cryfs-unmount`
+* Fixed small inaccuracy in calculation of free space in statvfs
+* Use libcurl dependency from conan instead of requiring it to be preinstalled
+* Updated dependencies to
+  * Fuse 2.9
+  * DokanY 2.0.6.1000
+  * range-v3/0.12.0
+  * boost 1.79
+  * spdlog/1.11.0
+
+Version 0.11.5 (unreleased)
+---------------
+* Fix an issue when using `-o` atime mount options
+
 Version 0.11.4
 ---------------
 * Fixed build issue with GCC 13 (see https://github.com/cryfs/cryfs/pull/448 )

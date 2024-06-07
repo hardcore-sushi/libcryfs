@@ -78,7 +78,7 @@ unique_ref<parallelaccessfsblobstore::ParallelAccessFsBlobStore> CryDevice::Crea
 
 #ifndef CRYFS_NO_COMPATIBILITY
 unique_ref<fsblobstore::FsBlobStore> CryDevice::MigrateOrCreateFsBlobStore(unique_ref<BlobStore> blobStore, CryConfigFile *configFile) {
-  string rootBlobId = configFile->config()->RootBlob();
+  const string rootBlobId = configFile->config()->RootBlob();
   if ("" == rootBlobId) {
     return make_unique_ref<FsBlobStore>(std::move(blobStore));
   }
@@ -194,9 +194,12 @@ optional<unique_ref<fspp::Node>> CryDevice::Load(const bf::path &path) {
     return optional<unique_ref<fspp::Node>>(make_unique_ref<CryDir>(this, none, none, _rootBlobId));
   }
 
-  auto parentWithGrandparent = LoadDirBlobWithParent(path.parent_path());
-  auto parent = std::move(parentWithGrandparent.blob);
-  auto grandparent = std::move(parentWithGrandparent.parent);
+  auto parentWithAncestors = LoadDirBlobWithAncestors(path.parent_path(), [](const BlockId&){});
+  if (parentWithAncestors == none) {
+    return none;
+  }
+  auto parent = std::move(parentWithAncestors->blob);
+  auto grandparent = std::move(parentWithAncestors->parent);
 
   auto optEntry = parent->GetChild(path.filename().string());
   if (optEntry == boost::none) {
@@ -215,16 +218,19 @@ optional<unique_ref<fspp::Node>> CryDevice::Load(const bf::path &path) {
   ASSERT(false, "Switch/case not exhaustive");
 }
 
-CryDevice::DirBlobWithParent CryDevice::LoadDirBlobWithParent(const bf::path &path) {
-  auto blob = LoadBlobWithParent(path);
-  auto dir = dynamic_pointer_move<DirBlobRef>(blob.blob);
+optional<CryDevice::DirBlobWithAncestors> CryDevice::LoadDirBlobWithAncestors(const bf::path &path, std::function<void (const blockstore::BlockId&)> ancestor_callback) {
+  auto blob = LoadBlobWithAncestors(path, std::move(ancestor_callback));
+  if (blob == none) {
+    return none;
+  }
+  auto dir = dynamic_pointer_move<DirBlobRef>(blob->blob);
   if (dir == none) {
     throw FuseErrnoException(ENOTDIR); // Loaded blob is not a directory
   }
-  return DirBlobWithParent{std::move(*dir), std::move(blob.parent)};
+  return DirBlobWithAncestors{std::move(*dir), std::move(blob->parent)};
 }
 
-CryDevice::BlobWithParent CryDevice::LoadBlobWithParent(const bf::path &path) {
+optional<CryDevice::BlobWithAncestors> CryDevice::LoadBlobWithAncestors(const bf::path &path, std::function<void (const blockstore::BlockId&)> ancestor_callback) {
   optional<unique_ref<DirBlobRef>> parentBlob = none;
   optional<unique_ref<FsBlobRef>> currentBlobOpt = _fsBlobStore->load(_rootBlobId);
   if (currentBlobOpt == none) {
@@ -235,6 +241,7 @@ CryDevice::BlobWithParent CryDevice::LoadBlobWithParent(const bf::path &path) {
   ASSERT(currentBlob->parentPointer() == BlockId::Null(), "Root Blob should have a nullptr as parent");
 
   for (const bf::path &component : path.relative_path()) {
+    ancestor_callback(currentBlob->blockId());
     auto currentDir = dynamic_pointer_move<DirBlobRef>(currentBlob);
     if (currentDir == none) {
       throw FuseErrnoException(ENOTDIR); // Path component is not a dir
@@ -242,19 +249,20 @@ CryDevice::BlobWithParent CryDevice::LoadBlobWithParent(const bf::path &path) {
 
     auto childOpt = (*currentDir)->GetChild(component.string());
     if (childOpt == boost::none) {
-      throw FuseErrnoException(ENOENT); // Child entry in directory not found
+      // Child entry in directory not found
+      return none;
     }
-    BlockId childId = childOpt->blockId();
+    const BlockId childId = childOpt->blockId();
     auto nextBlob = _fsBlobStore->load(childId);
     if (nextBlob == none) {
-      throw FuseErrnoException(ENOENT); // Blob for directory entry not found
+      throw FuseErrnoException(EIO); // Blob for directory entry not found
     }
     parentBlob = std::move(*currentDir);
     currentBlob = std::move(*nextBlob);
     ASSERT(currentBlob->parentPointer() == (*parentBlob)->blockId(), "Blob has wrong parent pointer");
   }
 
-  return BlobWithParent{std::move(currentBlob), std::move(parentBlob)};
+  return BlobWithAncestors{std::move(currentBlob), std::move(parentBlob)};
 
   //TODO (I think this is resolved, but I should test it)
   //     Running the python script, waiting for "Create files in sequential order...", then going into dir ~/tmp/cryfs-mount-.../Bonnie.../ and calling "ls"
@@ -265,8 +273,8 @@ CryDevice::BlobWithParent CryDevice::LoadBlobWithParent(const bf::path &path) {
 CryDevice::statvfs CryDevice::statfs() {
   callFsActionCallbacks();
 
-  uint64_t numUsedBlocks = _fsBlobStore->numBlocks();
-  uint64_t numFreeBlocks = _fsBlobStore->estimateSpaceForNumBlocksLeft();
+  const uint64_t numUsedBlocks = _fsBlobStore->numBlocks();
+  const uint64_t numFreeBlocks = _fsBlobStore->estimateSpaceForNumBlocksLeft();
 
   statvfs result;
   result.max_filename_length = 255; // We theoretically support unlimited file name length, but this is default for many Linux file systems, so probably also makes sense for CryFS.
@@ -314,7 +322,7 @@ void CryDevice::RemoveBlob(const blockstore::BlockId &blockId) {
 }
 
 BlockId CryDevice::GetOrCreateRootBlobId(CryConfigFile *configFile) {
-  string root_blockId = configFile->config()->RootBlob();
+  const string root_blockId = configFile->config()->RootBlob();
   if (root_blockId == "") { // NOLINT (workaround https://gcc.gnu.org/bugzilla/show_bug.cgi?id=82481 )
     auto new_blockId = CreateRootBlobAndReturnId();
     configFile->config()->SetRootBlob(new_blockId.ToString());

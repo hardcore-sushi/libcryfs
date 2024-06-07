@@ -1,8 +1,5 @@
 cmake_minimum_required(VERSION 3.10 FATAL_ERROR)
 
-# TODO Remove this deprecated policy switch once we're on cmake 3.4 or later
-cmake_policy(SET CMP0065 OLD)
-
 # TODO Perf test:
 #  - try if setting CRYPTOPP_NATIVE_ARCH=ON and adding -march=native to the compile commands for cryfs source files makes a difference
 #    -> if yes, offer a cmake option to enable both of these
@@ -27,7 +24,7 @@ option(USE_IWYU "build with iwyu checks enabled" OFF)
 option(CLANG_TIDY_WARNINGS_AS_ERRORS "treat clang-tidy warnings as errors" OFF)
 
 if (MSVC)
-    option(DOKAN_PATH "Location of the Dokan library, e.g. C:\\Program Files\\Dokan\\DokanLibrary-1.1.0" "")
+    option(DOKAN_PATH "Location of the Dokan library, e.g. C:\\Program Files\\Dokan\\DokanLibrary-2.0.6" "")
 endif()
 
 # Default value is to build in release mode but with debug symbols

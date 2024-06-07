@@ -10,7 +10,6 @@ namespace bf = boost::filesystem;
 using boost::property_tree::ptree;
 using boost::property_tree::write_json;
 using boost::property_tree::read_json;
-using boost::none;
 using std::ostream;
 using std::istream;
 using std::ifstream;
@@ -45,7 +44,7 @@ void _save(const bf::path &metadataFilePath, const ptree& data) {
 }
 
 string jsonPathForBasedir(const bf::path &basedir) {
-  return bf::canonical(basedir).string() + ".filesystemId";
+  return bf::absolute(basedir).lexically_normal().string() + ".filesystemId";
 }
 
 }

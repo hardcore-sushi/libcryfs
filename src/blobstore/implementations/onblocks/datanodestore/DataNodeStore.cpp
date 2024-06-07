@@ -23,7 +23,7 @@ namespace onblocks {
 namespace datanodestore {
 
 DataNodeStore::DataNodeStore(unique_ref<BlockStore> blockstore, uint64_t physicalBlocksizeBytes)
-: _blockstore(std::move(blockstore)), _layout(_blockstore->blockSizeFromPhysicalBlockSize(physicalBlocksizeBytes)) {
+: _blockstore(std::move(blockstore)), _layout(_blockstore->blockSizeFromPhysicalBlockSize(physicalBlocksizeBytes)), _physicalBlockSizeBytes(physicalBlocksizeBytes) {
 }
 
 DataNodeStore::~DataNodeStore() {
@@ -80,7 +80,7 @@ unique_ref<DataNode> DataNodeStore::overwriteNodeWith(unique_ref<DataNode> targe
 }
 
 void DataNodeStore::remove(unique_ref<DataNode> node) {
-  BlockId blockId = node->blockId();
+  const BlockId blockId = node->blockId();
   cpputils::destruct(std::move(node));
   remove(blockId);
 }
@@ -127,11 +127,11 @@ uint64_t DataNodeStore::numNodes() const {
 }
 
 uint64_t DataNodeStore::estimateSpaceForNumNodesLeft() const {
-  return _blockstore->estimateNumFreeBytes() / _layout.blocksizeBytes();
+  return _blockstore->estimateNumFreeBytes() / _physicalBlockSizeBytes;
 }
 
 uint64_t DataNodeStore::virtualBlocksizeBytes() const {
-  return _layout.blocksizeBytes();
+  return _layout.maxBytesPerLeaf();
 }
 
 DataNodeLayout DataNodeStore::layout() const {

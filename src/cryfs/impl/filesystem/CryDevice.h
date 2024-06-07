@@ -28,11 +28,11 @@ public:
   cpputils::unique_ref<parallelaccessfsblobstore::DirBlobRef> CreateDirBlob(const blockstore::BlockId &parent);
   cpputils::unique_ref<parallelaccessfsblobstore::SymlinkBlobRef> CreateSymlinkBlob(const boost::filesystem::path &target, const blockstore::BlockId &parent);
   cpputils::unique_ref<parallelaccessfsblobstore::FsBlobRef> LoadBlob(const blockstore::BlockId &blockId);
-  struct DirBlobWithParent {
-      cpputils::unique_ref<parallelaccessfsblobstore::DirBlobRef> blob;
-      boost::optional<cpputils::unique_ref<parallelaccessfsblobstore::DirBlobRef>> parent;
+  struct DirBlobWithAncestors {
+    cpputils::unique_ref<parallelaccessfsblobstore::DirBlobRef> blob;
+    boost::optional<cpputils::unique_ref<parallelaccessfsblobstore::DirBlobRef>> parent;
   };
-  DirBlobWithParent LoadDirBlobWithParent(const boost::filesystem::path &path);
+  boost::optional<DirBlobWithAncestors> LoadDirBlobWithAncestors(const boost::filesystem::path &path, std::function<void (const blockstore::BlockId&)> ancestor_callback);
   void RemoveBlob(const blockstore::BlockId &blockId);
 
   void onFsAction(std::function<void()> callback);
@@ -65,11 +65,11 @@ private:
   static cpputils::unique_ref<blockstore::BlockStore2> CreateIntegrityEncryptedBlockStore(cpputils::unique_ref<blockstore::BlockStore2> blockStore, const LocalStateDir& localStateDir, CryConfigFile *configFile, uint32_t myClientId, bool allowIntegrityViolations, bool missingBlockIsIntegrityViolation, std::function<void()> onIntegrityViolation);
   static cpputils::unique_ref<blockstore::BlockStore2> CreateEncryptedBlockStore(const CryConfig &config, cpputils::unique_ref<blockstore::BlockStore2> baseBlockStore);
 
-  struct BlobWithParent {
-      cpputils::unique_ref<parallelaccessfsblobstore::FsBlobRef> blob;
-      boost::optional<cpputils::unique_ref<parallelaccessfsblobstore::DirBlobRef>> parent;
+  struct BlobWithAncestors {
+    cpputils::unique_ref<parallelaccessfsblobstore::FsBlobRef> blob;
+    boost::optional<cpputils::unique_ref<parallelaccessfsblobstore::DirBlobRef>> parent;
   };
-  BlobWithParent LoadBlobWithParent(const boost::filesystem::path &path);
+  boost::optional<BlobWithAncestors> LoadBlobWithAncestors(const boost::filesystem::path &path, std::function<void (const blockstore::BlockId&)> ancestor_callback);
 
   DISALLOW_COPY_AND_ASSIGN(CryDevice);
 };
