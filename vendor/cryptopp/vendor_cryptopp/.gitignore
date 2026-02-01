@@ -1,0 +1,7 @@
+/build
+a.out
+/*.o
+/*.o.tmp
+/cpu-features.c
+/cpu-features.h
+/adhoc.cpp
