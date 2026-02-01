@@ -15,7 +15,7 @@ using boost::none;
 
 namespace cryfs {
 
-    CryConfigCreator::CryConfigCreator(RandomGenerator &encryptionKeyGenerator, LocalStateDir localStateDir)
+    CryConfigCreator::CryConfigCreator(RandomGenerator *encryptionKeyGenerator, LocalStateDir localStateDir)
         :_configConsole(), _encryptionKeyGenerator(encryptionKeyGenerator), _localStateDir(std::move(localStateDir)) {
     }
 
@@ -83,6 +83,6 @@ namespace cryfs {
     }
 
     CryConfig::FilesystemID CryConfigCreator::_generateFilesystemID() {
-        return Random::PseudoRandom().getFixedSize<CryConfig::FilesystemID::BINARY_LENGTH>();
+        return Random::PseudoRandom()->getFixedSize<CryConfig::FilesystemID::BINARY_LENGTH>();
     }
 }

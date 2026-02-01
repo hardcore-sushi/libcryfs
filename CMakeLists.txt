@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.10 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.25 FATAL_ERROR)
 
 # TODO Perf test:
 #  - try if setting CRYPTOPP_NATIVE_ARCH=ON and adding -march=native to the compile commands for cryfs source files makes a difference
@@ -24,7 +24,7 @@ option(USE_IWYU "build with iwyu checks enabled" OFF)
 option(CLANG_TIDY_WARNINGS_AS_ERRORS "treat clang-tidy warnings as errors" OFF)
 
 if (MSVC)
-    option(DOKAN_PATH "Location of the Dokan library, e.g. C:\\Program Files\\Dokan\\DokanLibrary-2.0.6" "")
+  option(DOKAN_PATH "Location of the Dokan library, e.g. C:\\Program Files\\Dokan\\DokanLibrary-2.2.0" "")
 endif()
 
 # Default value is to build in release mode but with debug symbols
@@ -34,13 +34,13 @@ endif(NOT CMAKE_BUILD_TYPE)
 
 # We don't use LTO because crypto++ has problems with it, see https://github.com/weidai11/cryptopp/issues/1031 and https://www.cryptopp.com/wiki/Link_Time_Optimization
 
-# The MSVC version on AppVeyor CI needs this
 if(MSVC)
+  # Needed to avoid a msvc build error "fatal error C1128: number of sections exceeded object file format limit: compile with /bigobj"
   add_definitions(/bigobj)
 endif()
 
 # Hardcoded version. Don't forget to change this when merging upstream!
-set(GIT_VERSION "0.11.4-libcryfs")
+set(GIT_VERSION "1.0.3-libcryfs")
 
 add_subdirectory(vendor EXCLUDE_FROM_ALL)
 add_subdirectory(src)

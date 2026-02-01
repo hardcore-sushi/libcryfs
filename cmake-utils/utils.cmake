@@ -1,25 +1,13 @@
 include(CheckCXXCompilerFlag)
 
 ###################################################
-#  Activate C++14
+#  Activate C++17
 #
-#  Uses: target_activate_cpp14(buildtarget)
+#  Uses: target_activate_cpp17(buildtarget)
 ###################################################
 function(target_activate_cpp14 TARGET)
-    if(MSVC)
-        # Required by range-v3, see its README.md
-        set_property(TARGET ${TARGET} PROPERTY CXX_STANDARD 17)
-    else()
-        set_property(TARGET ${TARGET} PROPERTY CXX_STANDARD 14)
-    endif()
+    set_property(TARGET ${TARGET} PROPERTY CXX_STANDARD 17)
     set_property(TARGET ${TARGET} PROPERTY CXX_STANDARD_REQUIRED ON)
-    # Ideally, we'd like to use libc++ on linux as well, but:
-    #    - http://stackoverflow.com/questions/37096062/get-a-basic-c-program-to-compile-using-clang-on-ubuntu-16
-    #    - https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=808086
-    # so only use it on Apple systems...
-    if(CMAKE_CXX_COMPILER_ID MATCHES "Clang" AND APPLE)
-        target_compile_options(${TARGET} PUBLIC -stdlib=libc++)
-    endif(CMAKE_CXX_COMPILER_ID MATCHES "Clang" AND APPLE)
 
     # We need ENABLE_EXPORTS so that boost::stacktrace works correctly
     set_property(TARGET ${TARGET} PROPERTY ENABLE_EXPORTS 1)
@@ -74,7 +62,7 @@ function(target_enable_style_warnings TARGET)
     endif()
 
     if (USE_WERROR)
-        message(STATUS Building ${TARGET} with -Werror)
+        message(STATUS "Building ${TARGET}  with -Werror")
         target_compile_options(${TARGET} PRIVATE -Werror)
     endif()
 
@@ -132,8 +120,8 @@ function(require_clang_version VERSION)
     endif(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 endfunction(require_clang_version)
 
-include(cmake-utils/TargetArch.cmake)
+include(cmake-utils/CryfsTargetArch.cmake)
 function(get_target_architecture output_var)
-	target_architecture(local_output_var)
+	cryfs_target_architecture(local_output_var)
 	set(${output_var} ${local_output_var} PARENT_SCOPE)
 endfunction()

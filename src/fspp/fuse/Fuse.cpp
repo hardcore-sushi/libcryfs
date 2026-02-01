@@ -35,24 +35,24 @@ using namespace fspp::fuse;
 using cpputils::set_thread_name;
 
 namespace {
-bool is_valid_fspp_path(const bf::path& path) {
-  // TODO In boost 1.63, we can use path.generic() or path.generic_path() instead of path.generic_string()
-  return path.has_root_directory()                     // must be absolute path
-         && !path.has_root_name()                      // on Windows, it shouldn't have a device specifier (i.e. no "C:")
-         && (path.string() == path.generic_string());  // must use portable '/' as directory separator
-}
-
-class ThreadNameForDebugging final {
-public:
-  ThreadNameForDebugging(const string& threadName) {
-    const std::string name = "fspp_" + threadName;
-    set_thread_name(name.c_str());
+  bool is_valid_fspp_path(const bf::path& path) {
+    // TODO In boost 1.63, we can use path.generic() or path.generic_path() instead of path.generic_string()
+    return path.has_root_directory()                    // must be absolute path
+          && !path.has_root_name()                      // on Windows, it shouldn't have a device specifier (i.e. no "C:")
+          && (path.string() == path.generic_string());  // must use portable '/' as directory separator
   }
 
-  ~ThreadNameForDebugging() {
-    set_thread_name("fspp_idle");
-  }
-};
+  class ThreadNameForDebugging final {
+  public:
+    ThreadNameForDebugging(const string& threadName) {
+      const std::string name = "fspp_" + threadName;
+      set_thread_name(name.c_str());
+    }
+
+    ~ThreadNameForDebugging() {
+      set_thread_name("fspp_idle");
+    }
+  };
 }
 
 // Remove the following line, if you don't want to output each fuse operation on the console
@@ -73,12 +73,10 @@ void Fuse::_logUnknownException() {
 
 void Fuse::_removeAndWarnIfExists(vector<string> *fuseOptions, const std::string &option) {
   auto found = std::find(fuseOptions->begin(), fuseOptions->end(), option);
-  if (found != fuseOptions->end()) {
+  while (found != fuseOptions->end()) {
     LOG(WARN, "The fuse option {} only works when running in foreground. Removing fuse option.", option);
-    do {
-      fuseOptions->erase(found);
-      found = std::find(fuseOptions->begin(), fuseOptions->end(), option);
-    } while (found != fuseOptions->end());
+    fuseOptions->erase(found);
+    found = std::find(fuseOptions->begin(), fuseOptions->end(), option);
   }
 }
 
@@ -194,13 +192,13 @@ int Fuse::mkdir(const bf::path &path, ::mode_t mode) {
 #endif
   try {
     ASSERT(is_valid_fspp_path(path), "has to be an absolute path");
-	// DokanY seems to call mkdir("/"). Ignore that
-	if ("/" == path) {
+    // DokanY seems to call mkdir("/"). Ignore that
+    if ("/" == path) {
 #ifdef FSPP_LOG
-        LOG(DEBUG, "mkdir({}, {}): ignored", path.string(), mode);
+      LOG(DEBUG, "mkdir({}, {}): ignored", path.string(), mode);
 #endif
-		return 0;
-	}
+      return 0;
+    }
 
     _fs->mkdir(path, mode, uid, gid);
 #ifdef FSPP_LOG
@@ -359,11 +357,11 @@ int Fuse::chmod(const bf::path &path, ::mode_t mode) {
 #endif
   try {
     ASSERT(is_valid_fspp_path(path), "has to be an absolute path");
-	_fs->chmod(path, mode);
+    _fs->chmod(path, mode);
 #ifdef FSPP_LOG
     LOG(DEBUG, "chmod({}, {}): success", path, mode);
 #endif
-	return 0;
+    return 0;
   } catch(const cpputils::AssertFailed &e) {
     LOG(ERR, "AssertFailed in Fuse::chmod: {}", e.what());
     return -EIO;
@@ -371,7 +369,7 @@ int Fuse::chmod(const bf::path &path, ::mode_t mode) {
 #ifdef FSPP_LOG
     LOG(WARN, "chmod({}, {}): failed with errno {}", path, mode, e.getErrno());
 #endif
-	return -e.getErrno();
+    return -e.getErrno();
   } catch(const std::exception &e) {
     _logException(e);
     return -EIO;
@@ -388,11 +386,11 @@ int Fuse::chown(const bf::path &path, ::uid_t uid, ::gid_t gid) {
 #endif
   try {
     ASSERT(is_valid_fspp_path(path), "has to be an absolute path");
-	_fs->chown(path, uid, gid);
+    _fs->chown(path, uid, gid);
 #ifdef FSPP_LOG
     LOG(DEBUG, "chown({}, {}, {}): success", path, uid, gid);
 #endif
-	return 0;
+    return 0;
   } catch(const cpputils::AssertFailed &e) {
     LOG(ERR, "AssertFailed in Fuse::chown: {}", e.what());
     return -EIO;
@@ -400,7 +398,7 @@ int Fuse::chown(const bf::path &path, ::uid_t uid, ::gid_t gid) {
 #ifdef FSPP_LOG
     LOG(WARN, "chown({}, {}, {}): failed with errno {}", path, uid, gid, e.getErrno());
 #endif
-	return -e.getErrno();
+    return -e.getErrno();
   } catch(const std::exception &e) {
     _logException(e);
     return -EIO;
@@ -678,7 +676,7 @@ int Fuse::fsync(int datasync, uint64_t fh) {
       _fs->fsync(fh);
     }
 #ifdef FSPP_LOG
-  LOG(DEBUG, "fsync({}, {}, _): success", fh, datasync);
+    LOG(DEBUG, "fsync({}, {}, _): success", fh, datasync);
 #endif
     return 0;
   } catch(const cpputils::AssertFailed &e) {

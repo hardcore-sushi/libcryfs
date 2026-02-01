@@ -25,7 +25,7 @@ namespace cryfs_cli {
             SizedData givenHash;
             SizedData* returnedHash;
         };
-        Cli(cpputils::RandomGenerator &keyGenerator, const cpputils::SCryptSettings& scryptSettings);
+        Cli(cpputils::RandomGenerator *keyGenerator, const cpputils::SCryptSettings& scryptSettings);
         fspp::fuse::Fuse* initFilesystem(const program_options::ProgramOptions &options, Credentials credentials);
 
     private:
@@ -39,7 +39,7 @@ namespace cryfs_cli {
         void _sanityCheckFilesystem(cryfs::CryDevice *device);
 
 
-        cpputils::RandomGenerator &_keyGenerator;
+        cpputils::RandomGenerator *_keyGenerator;
         cpputils::SCryptSettings _scryptSettings;
         boost::optional<cpputils::unique_ref<CallAfterTimeout>> _idleUnmounter;
         boost::optional<cpputils::unique_ref<cryfs::CryDevice>> _device;

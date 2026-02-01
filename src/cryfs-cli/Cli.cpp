@@ -69,7 +69,7 @@ using gitversion::VersionCompare;
 
 namespace cryfs_cli {
 
-    Cli::Cli(RandomGenerator &keyGenerator, const SCryptSettings &scryptSettings): _keyGenerator(keyGenerator), _scryptSettings(scryptSettings), _idleUnmounter(none), _device(none) {}
+    Cli::Cli(RandomGenerator *keyGenerator, const SCryptSettings &scryptSettings): _keyGenerator(keyGenerator), _scryptSettings(scryptSettings), _idleUnmounter(none), _device(none) {}
 
     bf::path Cli::_determineConfigFile(const ProgramOptions &options) {
         auto configFile = options.configFile();

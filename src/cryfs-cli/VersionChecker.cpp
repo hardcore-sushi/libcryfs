@@ -1,3 +1,5 @@
+#ifdef CRYFS_UPDATE_CHECKS
+
 #include "VersionChecker.h"
 #include <sstream>
 #include <boost/property_tree/json_parser.hpp>
@@ -71,3 +73,5 @@ namespace cryfs_cli {
     }
 
 }
+
+#endif

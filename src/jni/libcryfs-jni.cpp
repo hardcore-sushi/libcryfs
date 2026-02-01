@@ -38,7 +38,7 @@ cryfs_init(JNIEnv *env, jstring jbaseDir, jstring jlocalStateDir, jbyteArray jpa
 		cipher = boost::optional<string>(cipherName);
 		env->ReleaseStringUTFChars(jcipher, cipherName);
 	}
-	auto &keyGenerator = Random::OSRandom();
+	auto *keyGenerator = Random::OSRandom();
 	ProgramOptions options = ProgramOptions(baseDir, none, localStateDir, false, false, createBaseDir, cipher, none, false, none);
 	env->ReleaseStringUTFChars(jbaseDir, baseDir);
 	env->ReleaseStringUTFChars(jlocalStateDir, localStateDir);
