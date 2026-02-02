@@ -1,3 +1,4 @@
+#include <set>
 #include <jni.h>
 #include <cryfs-cli/Cli.h>
 #include <fspp/fuse/Fuse.h>
