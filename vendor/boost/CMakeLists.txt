@@ -1,6 +1,6 @@
 project(libboost)
 
-set(BOOST_VERSION "1_84")
+set(BOOST_VERSION "1_91")
 
 add_library(boost INTERFACE)
 set(BOOST_OUTPUT "${CMAKE_CURRENT_SOURCE_DIR}/build/${CMAKE_ANDROID_ARCH_ABI}")
@@ -24,7 +24,6 @@ set(BOOST_STATIC_LIBS
 	${BOOST_OUTPUT}/lib/libboost_exception-clang-mt-${BOOST_ARCH}-${BOOST_VERSION}.a
 	${BOOST_OUTPUT}/lib/libboost_filesystem-clang-mt-${BOOST_ARCH}-${BOOST_VERSION}.a
 	${BOOST_OUTPUT}/lib/libboost_serialization-clang-mt-${BOOST_ARCH}-${BOOST_VERSION}.a
-	${BOOST_OUTPUT}/lib/libboost_system-clang-mt-${BOOST_ARCH}-${BOOST_VERSION}.a
 	${BOOST_OUTPUT}/lib/libboost_thread-clang-mt-${BOOST_ARCH}-${BOOST_VERSION}.a
 	${BOOST_OUTPUT}/lib/libboost_wserialization-clang-mt-${BOOST_ARCH}-${BOOST_VERSION}.a
 )

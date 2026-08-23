@@ -32,7 +32,7 @@ fi
 sha256sum -c ../checksum.txt
 
 ./build-android.sh --boost="$BOOST_VERSION_DOTTED" --arch="$ABI" --target-version=21 \
-	--with-libraries=atomic,chrono,container,date_time,exception,filesystem,serialization,system,thread \
+	--with-libraries=atomic,chrono,container,date_time,exception,filesystem,serialization,thread \
 	"$NDK_PATH"
 
 mv build/out/"$ABI" ../build

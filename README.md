@@ -3,7 +3,7 @@ libcryfs is a re-design of the original [CryFS](https://github.com/cryfs/cryfs) 
 - Reduce attack surface by restricting volumes access to only one process rather than one user
 
 ## Warning !
-The only goal of this library is to be integrated in [DroidFS](https://forge.chapril.org/hardcoresushi/DroidFS). Thus, the current API has been designed to be accessed only via [Java Native Interface](https://docs.oracle.com/javase/8/docs/technotes/guides/jni), and logging has been redirected to Android logcat. You cannot use this library as is outside of Android. Moreover, libcryfs doesn't implement all features provided by CryFS such as symbolic links, editing attributes, flushing files... Use it at your own risk !
+The only goal of this library is to be integrated in [DroidFS](https://tangled.org/cipherd.arkensys.dedyn.io/DroidFS). Thus, the current API has been designed to be accessed only via [Java Native Interface](https://docs.oracle.com/javase/8/docs/technotes/guides/jni), and logging has been redirected to Android logcat. You cannot use this library as is outside of Android. Moreover, libcryfs doesn't implement all features provided by CryFS such as symbolic links, editing attributes, flushing files... Use it at your own risk !
 
 ## Changes:
 Here is what has been modified from the original project:
